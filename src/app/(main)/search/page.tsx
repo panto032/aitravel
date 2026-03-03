@@ -2,7 +2,8 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Search, ChevronLeft, Sparkles, Fingerprint } from "lucide-react";
+import Image from "next/image";
+import { Search, ChevronLeft, Sparkles, Fingerprint, MapPin } from "lucide-react";
 import type { SearchResponse, SearchResult } from "@/lib/ai";
 
 function ScanningScreen({ query }: { query: string }) {
@@ -47,35 +48,78 @@ function ResultCard({
         ? "bg-amber-500"
         : "bg-rose-500";
 
+  const scoreBorder =
+    result.aiScore >= 8
+      ? "border-emerald-500/40"
+      : result.aiScore >= 6
+        ? "border-amber-500/40"
+        : "border-rose-500/40";
+
+  const imageQuery = encodeURIComponent(`${result.location} hotel resort`);
+  const imageUrl = `https://source.unsplash.com/600x400/?${imageQuery}`;
+
   return (
     <div
-      className="glass-card p-6 rounded-[40px] border-white/5 hover:border-indigo-500/30 transition-all cursor-pointer group flex flex-col justify-between h-full"
+      className="glass-card rounded-[32px] border-white/5 hover:border-indigo-500/30 transition-all cursor-pointer group flex flex-col overflow-hidden h-full"
       onClick={onClick}
     >
-      <div className="flex justify-between items-start mb-6">
-        <div className="w-16 h-16 rounded-[24px] bg-white/5 flex flex-col items-center justify-center border border-white/10 group-hover:border-indigo-500/50 transition-all">
-          <span className="text-[10px] text-slate-500 font-black uppercase mb-1">
-            AI Score
-          </span>
-          <span className="text-2xl font-black italic text-white">
+      {/* Image */}
+      <div className="relative h-44 w-full overflow-hidden bg-slate-900">
+        <Image
+          src={imageUrl}
+          alt={result.hotelName}
+          fill
+          className="object-cover group-hover:scale-105 transition-transform duration-500"
+          unoptimized
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#020205] via-transparent to-transparent" />
+
+        {/* Score badge */}
+        <div className={`absolute top-4 left-4 glass-card ${scoreBorder} rounded-2xl px-3 py-2 flex flex-col items-center`}>
+          <span className="text-[8px] text-slate-400 font-black uppercase">AI</span>
+          <span className="text-lg font-black italic text-white leading-none">
             {result.aiScore.toFixed(1)}
           </span>
         </div>
-        <div className="text-right">
-          <div className="text-2xl font-black text-white">{result.priceRange}</div>
-          <div className="text-[10px] text-slate-500 font-bold">po noći</div>
+
+        {/* Price badge */}
+        <div className="absolute top-4 right-4 glass-card rounded-2xl px-3 py-2 text-right">
+          <div className="text-base font-black text-white leading-none">{result.priceRange}</div>
+          <div className="text-[8px] text-slate-400 font-bold">po noći</div>
+        </div>
+
+        {/* Location pill */}
+        <div className="absolute bottom-4 left-4 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5">
+          <MapPin size={10} className="text-indigo-400" />
+          <span className="text-[10px] text-white font-bold">{result.distance}</span>
         </div>
       </div>
-      <div>
-        <h3 className="text-xl font-bold mb-1 group-hover:text-indigo-400 transition-colors">
-          {result.hotelName}
-        </h3>
-        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-3">
-          {result.location} • {result.distance}
-        </p>
-        <p className="text-xs text-slate-400 leading-relaxed font-medium mb-4">
-          {result.shortSummary}
-        </p>
+
+      {/* Content */}
+      <div className="p-5 flex-1 flex flex-col justify-between">
+        <div>
+          <h3 className="text-lg font-bold mb-0.5 group-hover:text-indigo-400 transition-colors">
+            {result.hotelName}
+          </h3>
+          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-3">
+            {result.location}
+          </p>
+          <p className="text-xs text-slate-400 leading-relaxed font-medium mb-4">
+            {result.shortSummary}
+          </p>
+        </div>
+
+        {/* Tags */}
+        {result.tags && result.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {result.tags.slice(0, 3).map((tag) => (
+              <span key={tag} className="text-[9px] font-bold uppercase tracking-widest text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg">
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
         <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
           <div
             className={`h-full ${scoreColor} rounded-full`}
