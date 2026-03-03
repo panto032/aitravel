@@ -9,7 +9,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { query } = await request.json();
+    const { query, forceRefresh } = await request.json();
     if (!query || query.trim().length < 2) {
       return NextResponse.json(
         { error: "Unesite pojam za pretragu" },
@@ -17,7 +17,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const results = await searchDestination(query.trim(), session.user.id);
+    const results = await searchDestination(query.trim(), session.user.id, !!forceRefresh);
     return NextResponse.json(results);
   } catch (error) {
     const message =

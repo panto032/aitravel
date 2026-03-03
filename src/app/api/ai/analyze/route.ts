@@ -9,7 +9,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { hotelName, location, googlePlaceId } = await request.json();
+    const { hotelName, location, googlePlaceId, forceRefresh } = await request.json();
     if (!hotelName || !location) {
       return NextResponse.json(
         { error: "Naziv hotela i lokacija su obavezni" },
@@ -21,7 +21,8 @@ export async function POST(request: Request) {
       hotelName,
       location,
       session.user.id,
-      googlePlaceId
+      googlePlaceId,
+      !!forceRefresh
     );
     return NextResponse.json(analysis);
   } catch (error) {

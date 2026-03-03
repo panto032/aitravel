@@ -6,7 +6,7 @@ import {
   ChevronLeft, MapPin, Star, ShieldCheck, Zap, ArrowUpDown, ArrowRight,
   Sparkles, ShieldAlert, Fingerprint, Waves, Wifi, Coffee, Bed,
   Utensils, ThermometerSun, Heart, TrendingUp, TrendingDown, Minus,
-  ThumbsUp, ThumbsDown, Image as ImageIcon, Globe,
+  ThumbsUp, ThumbsDown, Image as ImageIcon, Globe, RefreshCw,
 } from "lucide-react";
 import type { HotelAnalysis } from "@/lib/ai";
 import { fetchAnalysis } from "@/lib/api-client";
@@ -147,6 +147,7 @@ function HotelDetailContent() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [fromCache, setFromCache] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackState>({});
   const [feedbackSending, setFeedbackSending] = useState<string | null>(null);
 
@@ -154,9 +155,9 @@ function HotelDetailContent() {
   const location = searchParams.get("location") || "";
   const googlePlaceId = searchParams.get("placeId") || undefined;
 
-  const loadAnalysis = useCallback(async () => {
+  const loadAnalysis = useCallback(async (forceRefresh = false) => {
     if (!hotelName || !location) return;
-    setLoading(true);
+    if (!forceRefresh) setLoading(true);
     setError("");
 
     // Multi-step loading messages
@@ -173,7 +174,7 @@ function HotelDetailContent() {
     }, 2500);
 
     try {
-      const result = await fetchAnalysis(hotelName, location, googlePlaceId);
+      const result = await fetchAnalysis(hotelName, location, googlePlaceId, forceRefresh);
       setAnalysis(result.data as HotelAnalysis);
       setFromCache(result.fromCache);
     } catch (err) {
@@ -181,8 +182,20 @@ function HotelDetailContent() {
     } finally {
       clearInterval(interval);
       setLoading(false);
+      setRefreshing(false);
     }
   }, [hotelName, location, googlePlaceId]);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    loadAnalysis(true);
+  };
+
+  // Show refresh button only if analysis is older than 90 days
+  const REFRESH_THRESHOLD_DAYS = 90;
+  const canRefresh = analysis?.cachedAt
+    ? (Date.now() - new Date(analysis.cachedAt).getTime()) > REFRESH_THRESHOLD_DAYS * 24 * 60 * 60 * 1000
+    : false;
 
   useEffect(() => {
     loadAnalysis();
@@ -244,7 +257,7 @@ function HotelDetailContent() {
             {error || "Nema podataka"}
           </p>
           <button
-            onClick={loadAnalysis}
+            onClick={() => loadAnalysis()}
             className="text-indigo-400 text-sm font-black uppercase tracking-widest"
           >
             Pokušaj ponovo
@@ -269,6 +282,18 @@ function HotelDetailContent() {
           <ChevronLeft size={24} />
         </button>
         <div className="flex items-center gap-3">
+          {canRefresh && (
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="glass-card px-4 py-2 rounded-full flex items-center gap-2 transition-all hover:bg-white/5 text-slate-400 border-amber-500/20"
+            >
+              <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
+              <span className="text-[10px] font-black uppercase tracking-widest">
+                {refreshing ? "Osvežavam..." : "Osveži"}
+              </span>
+            </button>
+          )}
           <button
             onClick={handleSave}
             disabled={saved || saving}

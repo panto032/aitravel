@@ -36,8 +36,8 @@ const ANALYZE_MODEL = "claude-sonnet-4-6";
 // Monthly free limit
 const FREE_MONTHLY_LIMIT = 10;
 
-// Cache TTL in days (30 days for better cost optimization)
-const CACHE_TTL_DAYS = 30;
+// Cache never expires automatically — re-analyze only on explicit user request
+// or when AI feedback accuracy drops below threshold
 
 // Daily cost safety limit
 const DAILY_COST_LIMIT = 10.0;
@@ -184,6 +184,7 @@ export interface HotelAnalysis {
   languageBreakdown?: { language: string; count: number; flag: string }[];
   latitude?: number;
   longitude?: number;
+  cachedAt?: string; // ISO date when this analysis was created/cached
 }
 
 export interface SearchResult {
@@ -218,19 +219,18 @@ export interface SearchResponse {
 
 export async function searchDestination(
   query: string,
-  userId: string
+  userId: string,
+  forceRefresh = false
 ): Promise<SearchResponse> {
-  // Check cache first
+  // Check cache first (permanent — no TTL expiry)
   const normalizedQuery = query.trim().toLowerCase();
-  const cached = await prisma.searchCache.findUnique({
-    where: { query: normalizedQuery },
-  });
 
-  if (cached) {
-    const age = Date.now() - cached.updatedAt.getTime();
-    const maxAge = CACHE_TTL_DAYS * 24 * 60 * 60 * 1000;
+  if (!forceRefresh) {
+    const cached = await prisma.searchCache.findUnique({
+      where: { query: normalizedQuery },
+    });
 
-    if (age < maxAge) {
+    if (cached) {
       await logApiUsage(userId, "search", "cache", 0, 0, query, true);
       return cached.results as unknown as SearchResponse;
     }
@@ -518,20 +518,20 @@ export async function analyzeHotel(
   hotelName: string,
   location: string,
   userId: string,
-  googlePlaceId?: string
+  googlePlaceId?: string,
+  forceRefresh = false
 ): Promise<HotelAnalysis> {
-  // Check hotel cache first
-  const cached = await prisma.hotelCache.findUnique({
-    where: { name_location: { name: hotelName, location } },
-  });
+  // Check hotel cache first (permanent — no TTL expiry)
+  if (!forceRefresh) {
+    const cached = await prisma.hotelCache.findUnique({
+      where: { name_location: { name: hotelName, location } },
+    });
 
-  if (cached?.aiAnalysis) {
-    const age = Date.now() - cached.updatedAt.getTime();
-    const maxAge = CACHE_TTL_DAYS * 24 * 60 * 60 * 1000;
-
-    if (age < maxAge) {
+    if (cached?.aiAnalysis) {
       await logApiUsage(userId, "analyze", "cache", 0, 0, hotelName, true);
-      return cached.aiAnalysis as unknown as HotelAnalysis;
+      const cachedResult = cached.aiAnalysis as unknown as HotelAnalysis;
+      cachedResult.cachedAt = cached.updatedAt.toISOString();
+      return cachedResult;
     }
   }
 
@@ -701,6 +701,7 @@ export async function analyzeHotel(
   result.languageBreakdown = geminiAnalysis?.languageBreakdown;
   result.latitude = placeDetails?.location?.latitude;
   result.longitude = placeDetails?.location?.longitude;
+  result.cachedAt = new Date().toISOString();
 
   // Merge Gemini trends and quotes into scores
   if (geminiAnalysis) {

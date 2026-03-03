@@ -68,7 +68,8 @@ export async function fetchSearch(query: string): Promise<{
 export async function fetchAnalysis(
   hotelName: string,
   location: string,
-  googlePlaceId?: string
+  googlePlaceId?: string,
+  forceRefresh = false
 ): Promise<{
   data: unknown;
   fromCache: boolean;
@@ -82,7 +83,7 @@ export async function fetchAnalysis(
       const res = await fetch("/api/ai/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ hotelName, location, googlePlaceId }),
+        body: JSON.stringify({ hotelName, location, googlePlaceId, forceRefresh }),
       });
 
       if (res.ok) {
