@@ -565,8 +565,30 @@ export default function LandingPage() {
         >
           Kreiraj besplatan nalog — za 30 sekundi
         </Link>
-        <div className="text-slate-700 text-xs font-medium">
-          TravelAI © 2026 | Uslovi | Privatnost
+        <div className="text-slate-700 text-xs font-medium space-y-2">
+          <div className="flex items-center justify-center gap-3">
+            <Link href="/uslovi" className="hover:text-indigo-400 transition-colors">
+              Uslovi korišćenja
+            </Link>
+            <span>|</span>
+            <Link href="/privatnost" className="hover:text-indigo-400 transition-colors">
+              Politika privatnosti
+            </Link>
+            <span>|</span>
+            <Link href="/o-nama" className="hover:text-indigo-400 transition-colors">
+              O nama
+            </Link>
+          </div>
+          <p>
+            TravelAI © 2026 — Kreirao{" "}
+            <a href="https://impulsee.cloud" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline">
+              IMPULSE
+            </a>{" "}
+            part of{" "}
+            <a href="https://impuls-tech.rs" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline">
+              IMPULS TECH DOO
+            </a>
+          </p>
         </div>
       </section>
 
