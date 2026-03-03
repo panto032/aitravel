@@ -27,11 +27,11 @@ const anthropic = new Anthropic({
 // Pricing per 1M tokens (USD)
 const PRICING: Record<string, { input: number; output: number }> = {
   "claude-haiku-4-5-20251001": { input: 0.8, output: 4.0 },
-  "claude-sonnet-4-6-20250514": { input: 3.0, output: 15.0 },
+  "claude-sonnet-4-6": { input: 3.0, output: 15.0 },
 };
 
 const SEARCH_MODEL = "claude-haiku-4-5-20251001";
-const ANALYZE_MODEL = "claude-sonnet-4-6-20250514";
+const ANALYZE_MODEL = "claude-sonnet-4-6";
 
 // Monthly free limit
 const FREE_MONTHLY_LIMIT = 10;
