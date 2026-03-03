@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TravelAI — Landing Page</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #020205; color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; overflow-x: hidden; }
+
+  /* Ambient glow */
+  .glow-1 { position: fixed; top: -10%; left: -10%; width: 60%; height: 60%; background: rgba(99,102,241,0.05); filter: blur(120px); border-radius: 50%; pointer-events: none; }
+  .glow-2 { position: fixed; bottom: -10%; right: -10%; width: 50%; height: 50%; background: rgba(168,85,247,0.05); filter: blur(120px); border-radius: 50%; pointer-events: none; }
+
+  .glass-card { background: rgba(255,255,255,0.02); backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.05); }
+  .text-gradient { background: linear-gradient(135deg, #fff 40%, #818cf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+  .container { max-w: 1200px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+  /* Header */
+  .header { height: 80px; padding: 0 40px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; background: rgba(2,2,5,0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .logo { font-size: 24px; font-weight: 900; font-style: italic; letter-spacing: -0.05em; color: white; }
+  .logo span { color: #6366f1; text-decoration: underline; text-underline-offset: 4px; }
+  .btn-primary { background: #4f46e5; color: white; padding: 10px 24px; border-radius: 12px; font-weight: 700; font-size: 13px; border: none; cursor: pointer; }
+  .btn-primary:hover { background: #6366f1; }
+
+  /* Hero */
+  .hero { text-align: center; max-width: 900px; margin: 80px auto 0; padding: 0 24px; }
+  .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(16,185,129,0.1); color: #10b981; padding: 8px 16px; border-radius: 999px; border: 1px solid rgba(16,185,129,0.2); font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 32px; }
+  .hero h1 { font-size: clamp(48px, 10vw, 120px); font-weight: 900; font-style: italic; line-height: 0.85; letter-spacing: -0.05em; text-transform: uppercase; margin-bottom: 32px; }
+  .hero h1 .accent { color: #6366f1; text-decoration: underline; text-decoration-color: rgba(99,102,241,0.2); text-underline-offset: 8px; }
+  .hero p { font-size: 18px; color: #64748b; max-width: 600px; margin: 0 auto 48px; line-height: 1.7; font-weight: 500; }
+  .hero-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; }
+  .btn-hero { padding: 20px 48px; border-radius: 28px; font-weight: 900; font-size: 13px; text-transform: uppercase; letter-spacing: 0.2em; border: none; cursor: pointer; transition: transform 0.2s; }
+  .btn-hero:hover { transform: scale(1.05); }
+  .btn-hero:active { transform: scale(0.95); }
+  .btn-hero-primary { background: #4f46e5; color: white; box-shadow: 0 20px 60px rgba(99,102,241,0.3); }
+  .btn-hero-secondary { background: transparent; color: white; border: 1px solid rgba(255,255,255,0.1); }
+  .btn-hero-secondary:hover { background: rgba(255,255,255,0.05); }
+
+  /* Steps */
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 32px; margin: 160px auto; max-width: 1200px; padding: 0 24px; }
+  .step-card { padding: 40px; border-radius: 45px; }
+  .step-card:hover { border-color: rgba(99,102,241,0.4); }
+  .step-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; }
+  .step-icon { width: 64px; height: 64px; background: rgba(99,102,241,0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #6366f1; font-size: 24px; }
+  .step-num { font-size: 48px; font-weight: 900; font-style: italic; opacity: 0.1; }
+  .step-card h4 { font-size: 22px; font-weight: 900; text-transform: uppercase; letter-spacing: -0.03em; font-style: italic; margin-bottom: 16px; }
+  .step-card p { font-size: 14px; color: #64748b; line-height: 1.7; font-weight: 500; }
+
+  /* Stats */
+  .stats-section { border-radius: 60px; padding: 80px; text-align: center; margin: 0 24px 160px; border-color: rgba(99,102,241,0.1); }
+  .stats-label { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5em; color: #818cf8; margin-bottom: 48px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 48px; }
+  .stat-val { font-size: clamp(40px, 6vw, 72px); font-weight: 900; font-style: italic; letter-spacing: -0.05em; margin-bottom: 8px; }
+  .stat-label { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.3em; color: #64748b; }
+
+  /* Showcase */
+  .showcase { margin: 0 24px 160px; }
+  .showcase h2 { font-size: clamp(28px, 4vw, 48px); font-weight: 900; font-style: italic; letter-spacing: -0.05em; text-transform: uppercase; margin-bottom: 48px; }
+  .showcase-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px; }
+  .showcase-card { border-radius: 45px; overflow: hidden; cursor: pointer; transition: transform 0.3s; border-color: rgba(255,255,255,0.05); box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+  .showcase-card:hover { transform: translateY(-8px); }
+  .showcase-img { height: 220px; background: rgba(15,23,42,0.5); padding: 32px; display: flex; flex-direction: column; justify-content: space-between; position: relative; }
+  .showcase-badge { background: #4f46e5; color: white; padding: 4px 12px; border-radius: 8px; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; display: inline-block; }
+  .showcase-score { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-style: italic; font-size: 18px; color: #818cf8; }
+  .showcase-card h3 { font-size: 24px; font-weight: 900; font-style: italic; color: white; }
+  .showcase-loc { font-size: 10px; font-weight: 900; text-transform: uppercase; color: #64748b; letter-spacing: 0.15em; }
+  .showcase-body { padding: 32px; }
+  .showcase-stars { display: flex; gap: 2px; margin-bottom: 16px; color: #6366f1; }
+  .showcase-body p { font-size: 12px; font-style: italic; color: #64748b; line-height: 1.7; margin-bottom: 24px; }
+  .showcase-link { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: #6366f1; display: flex; align-items: center; gap: 8px; }
+
+  /* Free section */
+  .free-section { border-radius: 70px; padding: 80px; margin: 0 24px 160px; background: linear-gradient(135deg, rgba(99,102,241,0.1), transparent); border-color: rgba(99,102,241,0.2); position: relative; overflow: hidden; }
+  .free-section h2 { font-size: clamp(36px, 6vw, 72px); font-weight: 900; font-style: italic; line-height: 1; margin-bottom: 40px; }
+  .free-list { list-style: none; margin-bottom: 48px; }
+  .free-list li { display: flex; align-items: center; gap: 16px; font-size: 18px; font-weight: 700; font-style: italic; margin-bottom: 24px; }
+  .free-list .check { color: #10b981; font-size: 20px; }
+  .btn-free { background: white; color: black; padding: 20px 48px; border-radius: 30px; font-weight: 900; font-size: 13px; text-transform: uppercase; letter-spacing: 0.15em; border: none; cursor: pointer; box-shadow: 0 25px 50px rgba(0,0,0,0.3); }
+
+  /* Footer */
+  .footer { text-align: center; padding: 80px 24px; }
+  .footer h3 { font-size: 28px; font-weight: 900; font-style: italic; text-transform: uppercase; letter-spacing: -0.03em; margin-bottom: 32px; }
+  .footer p { color: #64748b; font-weight: 500; margin-bottom: 48px; }
+  .footer-links { display: flex; justify-content: center; gap: 16px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: #475569; flex-wrap: wrap; }
+  .footer-links a { color: #6366f1; text-decoration: none; }
+  .footer-links a:hover { text-decoration: underline; }
+
+  @media (max-width: 768px) {
+    .header { padding: 0 16px; height: 64px; }
+    .hero { margin-top: 40px; }
+    .stats-section { padding: 40px 24px; border-radius: 40px; }
+    .free-section { padding: 40px 24px; border-radius: 40px; }
+    .steps { padding: 0 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="glow-1"></div>
+<div class="glow-2"></div>
+
+<!-- Header -->
+<header class="header">
+  <div class="logo">Travel<span>AI</span></div>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <button class="btn-primary">Prijavi se</button>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-badge">✦ Besplatno — Zauvek</div>
+  <h1 class="text-gradient">Putuj bez <br><span class="accent">maski.</span></h1>
+  <p>Prva platforma koja analizira hiljade recenzija pomoću AI agenata kako bi ti pokazala šta se stvarno dešava u hotelu.</p>
+  <div class="hero-buttons">
+    <button class="btn-hero btn-hero-primary">Kreiraj besplatan nalog</button>
+    <button class="btn-hero btn-hero-secondary">Vidi demo analizu</button>
+  </div>
+</section>
+
+<!-- Kako radi -->
+<div class="steps">
+  <div class="glass-card step-card">
+    <div class="step-top">
+      <div class="step-icon">🔍</div>
+      <span class="step-num">1</span>
+    </div>
+    <h4>Pretraži hotel</h4>
+    <p>Ukucaj ime ili link. Naš sistem pronalazi verifikovane podatke iz svih izvora.</p>
+  </div>
+  <div class="glass-card step-card">
+    <div class="step-top">
+      <div class="step-icon">🔬</div>
+      <span class="step-num">2</span>
+    </div>
+    <h4>AI čita hiljade utisaka</h4>
+    <p>3 AI agenta (Gemini, Claude, GPT) analiziraju sve: od buke do kvaliteta dušeka.</p>
+  </div>
+  <div class="glass-card step-card">
+    <div class="step-top">
+      <div class="step-icon">🛡️</div>
+      <span class="step-num">3</span>
+    </div>
+    <h4>Dobijaš istinu</h4>
+    <p>Izveštaj koji razbija marketing. Saznaj šta se krije iza lepih slika.</p>
+  </div>
+</div>
+
+<!-- Stats -->
+<section class="glass-card stats-section">
+  <div class="stats-label">Brojke koje garantuju preciznost</div>
+  <div class="stats-grid">
+    <div>
+      <div class="stat-val">450k+</div>
+      <div class="stat-label">Recenzija Analizirano</div>
+    </div>
+    <div>
+      <div class="stat-val">12.5k+</div>
+      <div class="stat-label">Hotela u Bazi</div>
+    </div>
+    <div>
+      <div class="stat-val">100+</div>
+      <div class="stat-label">Destinacija Pokriveno</div>
+    </div>
+  </div>
+</section>
+
+<!-- Showcase -->
+<section class="showcase">
+  <h2>Showcase Rezultati</h2>
+  <div class="showcase-grid">
+    <div class="glass-card showcase-card">
+      <div class="showcase-img">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <span class="showcase-badge">Best Value</span>
+          <div class="glass-card showcase-score">8.7</div>
+        </div>
+        <div>
+          <h3>Vila Kostas</h3>
+          <span class="showcase-loc">Hanioti</span>
+        </div>
+      </div>
+      <div class="showcase-body">
+        <div class="showcase-stars">★★★★★</div>
+        <p>"Saznaj šta gosti kažu o doručku i buci iz susednih barova pre nego što rezervišeš..."</p>
+        <span class="showcase-link">Pogledaj AI Analizu →</span>
+      </div>
+    </div>
+    <div class="glass-card showcase-card">
+      <div class="showcase-img">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <span class="showcase-badge">Premium</span>
+          <div class="glass-card showcase-score">8.9</div>
+        </div>
+        <div>
+          <h3>Aegean Melathron</h3>
+          <span class="showcase-loc">Kallithea</span>
+        </div>
+      </div>
+      <div class="showcase-body">
+        <div class="showcase-stars">★★★★★</div>
+        <p>"Luksuz koji opravdava cenu. Ali AI otkriva problem sa parkingom u špicu..."</p>
+        <span class="showcase-link">Pogledaj AI Analizu →</span>
+      </div>
+    </div>
+    <div class="glass-card showcase-card">
+      <div class="showcase-img">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <span class="showcase-badge" style="background:#ef4444">Risk Alert</span>
+          <div class="glass-card showcase-score" style="color:#ef4444">5.2</div>
+        </div>
+        <div>
+          <h3>Hotel Lukas</h3>
+          <span class="showcase-loc">Budva</span>
+        </div>
+      </div>
+      <div class="showcase-body">
+        <div class="showcase-stars">★★★☆☆</div>
+        <p>"Izbegavaj u špicu sezone. AI detektuje ponavljajuće žalbe na klimu i higijenu..."</p>
+        <span class="showcase-link">Pogledaj AI Analizu →</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Besplatno -->
+<section class="glass-card free-section">
+  <h2>BESPLATNO.<br>ZAUVEK.</h2>
+  <ul class="free-list">
+    <li><span class="check">✓</span> 10 AI analiza mesečno besplatno</li>
+    <li><span class="check">✓</span> Kompletan izveštaj o manama hotela</li>
+    <li><span class="check">✓</span> Čuvanje omiljenih destinacija</li>
+  </ul>
+  <button class="btn-free">Pokreni besplatnu pretragu</button>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <h3>Ne dozvoli da te prevare.</h3>
+  <p>Pridruži se hiljadama pametnih putnika koji koriste TravelAI.</p>
+  <div class="footer-links">
+    <span>TravelAI © 2026</span>
+    <span>•</span>
+    <a href="#">Uslovi Korišćenja</a>
+    <span>•</span>
+    <a href="#">Politika Privatnosti</a>
+    <span>•</span>
+    <a href="#">O nama</a>
+    <span>•</span>
+    <span>Kreirao <a href="https://impulsee.cloud" target="_blank">IMPULSE</a> part of <a href="https://impuls-tech.rs" target="_blank">IMPULS TECH DOO</a></span>
+  </div>
+</footer>
+
+</body>
+</html>

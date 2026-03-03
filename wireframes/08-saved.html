@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TravelAI — Sačuvano</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #020205; color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; overflow-x: hidden; min-height: 100vh; }
+  .glow-1 { position: fixed; top: -10%; left: -10%; width: 60%; height: 60%; background: rgba(99,102,241,0.05); filter: blur(120px); border-radius: 50%; pointer-events: none; }
+  .glow-2 { position: fixed; bottom: -10%; right: -10%; width: 50%; height: 50%; background: rgba(168,85,247,0.05); filter: blur(120px); border-radius: 50%; pointer-events: none; }
+  .glass-card { background: rgba(255,255,255,0.02); backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.05); }
+  .text-gradient { background: linear-gradient(135deg, #fff 40%, #818cf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 40px 24px 160px; position: relative; z-index: 1; }
+
+  /* Back */
+  .top-bar { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
+  .back-btn { width: 48px; height: 48px; border-radius: 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 20px; cursor: pointer; text-decoration: none; }
+  .top-bar h2 { font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: #64748b; }
+  .top-bar .compare-btn { margin-left: auto; padding: 10px 24px; border-radius: 20px; background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.25); color: #818cf8; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; text-decoration: none; }
+
+  /* Heading */
+  h1 { font-size: clamp(28px, 5vw, 48px); font-weight: 900; font-style: italic; line-height: 1; letter-spacing: -0.04em; margin-bottom: 8px; }
+  .subtitle { font-size: 13px; color: #64748b; font-weight: 500; margin-bottom: 40px; }
+
+  /* Saved cards */
+  .saved-list { display: flex; flex-direction: column; gap: 16px; }
+
+  .saved-card { border-radius: 32px; display: flex; overflow: hidden; cursor: pointer; transition: border-color 0.3s, transform 0.2s; }
+  .saved-card:hover { border-color: rgba(99,102,241,0.3); transform: translateY(-2px); }
+
+  .saved-img { width: 140px; min-height: 140px; background: linear-gradient(135deg, #1e1b4b, #312e81); flex-shrink: 0; position: relative; }
+  .saved-img .score { position: absolute; bottom: 12px; left: 12px; width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px; }
+  .score.green { background: rgba(16,185,129,0.2); border: 1px solid rgba(16,185,129,0.3); color: #10b981; }
+  .score.amber { background: rgba(245,158,11,0.2); border: 1px solid rgba(245,158,11,0.3); color: #f59e0b; }
+  .score.red { background: rgba(244,63,94,0.2); border: 1px solid rgba(244,63,94,0.3); color: #f43f5e; }
+
+  .saved-info { padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+  .saved-name { font-size: 16px; font-weight: 900; margin-bottom: 4px; }
+  .saved-loc { font-size: 12px; color: #64748b; font-weight: 500; margin-bottom: 8px; }
+  .saved-meta { display: flex; gap: 12px; align-items: center; margin-bottom: 8px; }
+  .saved-meta span { font-size: 11px; font-weight: 700; }
+  .saved-google { color: #facc15; }
+  .saved-reviews { color: #475569; }
+  .saved-summary { font-size: 12px; color: #64748b; font-style: italic; line-height: 1.5; }
+  .saved-date { font-size: 10px; color: #334155; font-weight: 600; margin-top: 8px; }
+
+  .saved-actions { display: flex; flex-direction: column; justify-content: center; gap: 8px; padding: 20px; }
+  .action-btn { width: 40px; height: 40px; border-radius: 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; color: #475569; font-size: 16px; cursor: pointer; transition: all 0.3s; }
+  .action-btn:hover { border-color: rgba(244,63,94,0.3); color: #f43f5e; }
+  .action-btn.compare-check { border-color: rgba(99,102,241,0.2); color: #818cf8; }
+
+  /* Empty state */
+  .empty { text-align: center; padding: 80px 24px; }
+  .empty-icon { font-size: 48px; color: #475569; margin-bottom: 16px; }
+  .empty-title { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+  .empty-desc { font-size: 13px; color: #64748b; max-width: 300px; margin: 0 auto; }
+
+  /* Bottom Nav */
+  .bottom-nav { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); min-width: 500px; height: 80px; background: rgba(2,6,23,0.9); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.1); border-radius: 40px; display: flex; justify-content: space-around; align-items: center; padding: 0 32px; z-index: 200; box-shadow: 0 25px 50px rgba(0,0,0,0.8); }
+  .nav-item { color: #475569; padding: 12px; cursor: pointer; font-size: 22px; }
+  .nav-item.active { color: #6366f1; }
+  .nav-center { width: 64px; height: 64px; border-radius: 24px; background: linear-gradient(135deg, #4f46e5, #7c3aed); display: flex; align-items: center; justify-content: center; color: white; font-size: 28px; margin-top: -48px; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 10px 40px rgba(99,102,241,0.4); cursor: pointer; }
+
+  @media (max-width: 768px) {
+    .saved-card { flex-direction: column; }
+    .saved-img { width: 100%; height: 160px; }
+    .saved-actions { flex-direction: row; padding: 12px 20px; }
+    .bottom-nav { min-width: auto; width: 92%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="glow-1"></div>
+<div class="glow-2"></div>
+
+<div class="container">
+  <!-- Top bar -->
+  <div class="top-bar">
+    <a href="02-dashboard.html" class="back-btn">←</a>
+    <h2>Sačuvano</h2>
+    <a href="06-compare.html" class="compare-btn">Uporedi izabrane</a>
+  </div>
+
+  <h1 class="text-gradient">Moji hoteli</h1>
+  <p class="subtitle">Sačuvane analize — pristupaj offline, uporedi kad želiš</p>
+
+  <!-- Saved list -->
+  <div class="saved-list">
+    <!-- Card 1 -->
+    <div class="glass-card saved-card">
+      <div class="saved-img">
+        <div class="score green">8.5</div>
+      </div>
+      <div class="saved-info">
+        <div class="saved-name">Alexander The Great Hotel</div>
+        <div class="saved-loc">Hanioti, Kasandra, Grčka</div>
+        <div class="saved-meta">
+          <span class="saved-google">&#9733; 4.6 Google</span>
+          <span class="saved-reviews">2,450 recenzija</span>
+        </div>
+        <div class="saved-summary">"Odličan hotel za porodice — doručak je jedina slabija tačka."</div>
+        <div class="saved-date">Sačuvano pre 2 dana</div>
+      </div>
+      <div class="saved-actions">
+        <div class="action-btn compare-check">&#x2713;</div>
+        <div class="action-btn">&#x1F5D1;</div>
+      </div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="glass-card saved-card">
+      <div class="saved-img">
+        <div class="score green">8.9</div>
+      </div>
+      <div class="saved-info">
+        <div class="saved-name">Xenios Anastasia Resort</div>
+        <div class="saved-loc">Hanioti, Kasandra, Grčka</div>
+        <div class="saved-meta">
+          <span class="saved-google">&#9733; 4.7 Google</span>
+          <span class="saved-reviews">3,100 recenzija</span>
+        </div>
+        <div class="saved-summary">"Premium iskustvo, izvanredan bazen i spa. WiFi odličan."</div>
+        <div class="saved-date">Sačuvano pre 3 dana</div>
+      </div>
+      <div class="saved-actions">
+        <div class="action-btn compare-check">&#x2713;</div>
+        <div class="action-btn">&#x1F5D1;</div>
+      </div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="glass-card saved-card">
+      <div class="saved-img">
+        <div class="score amber">6.8</div>
+      </div>
+      <div class="saved-info">
+        <div class="saved-name">Sousouras Hotel</div>
+        <div class="saved-loc">Hanioti, Kasandra, Grčka</div>
+        <div class="saved-meta">
+          <span class="saved-google">&#9733; 4.1 Google</span>
+          <span class="saved-reviews">1,340 recenzija</span>
+        </div>
+        <div class="saved-summary">"Dobra lokacija, ali čistoća i osoblje variraju. Hrana prosječna."</div>
+        <div class="saved-date">Sačuvano pre 5 dana</div>
+      </div>
+      <div class="saved-actions">
+        <div class="action-btn">&#x2610;</div>
+        <div class="action-btn">&#x1F5D1;</div>
+      </div>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="glass-card saved-card">
+      <div class="saved-img">
+        <div class="score red">4.2</div>
+      </div>
+      <div class="saved-info">
+        <div class="saved-name">Hotel Mallas</div>
+        <div class="saved-loc">Hanioti, Kasandra, Grčka</div>
+        <div class="saved-meta">
+          <span class="saved-google">&#9733; 3.5 Google</span>
+          <span class="saved-reviews">780 recenzija</span>
+        </div>
+        <div class="saved-summary">"Izbegavaj — čistoća katastrofa, wifi ne radi, hladni doručak."</div>
+        <div class="saved-date">Sačuvano pre 1 nedelje</div>
+      </div>
+      <div class="saved-actions">
+        <div class="action-btn">&#x2610;</div>
+        <div class="action-btn">&#x1F5D1;</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+  <span class="nav-item">&#x1F3E0;</span>
+  <span class="nav-item">&#x1F30D;</span>
+  <div class="nav-center">&#x26A1;</div>
+  <span class="nav-item active">&#x1F554;</span>
+  <span class="nav-item">&#x1F464;</span>
+</div>
+
+</body>
+</html>

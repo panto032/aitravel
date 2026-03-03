@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TravelAI — Skeniranje</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #020205; color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; overflow-x: hidden; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+  .glow-1 { position: fixed; top: -10%; left: -10%; width: 60%; height: 60%; background: rgba(99,102,241,0.05); filter: blur(120px); border-radius: 50%; pointer-events: none; }
+  .glow-2 { position: fixed; bottom: -10%; right: -10%; width: 50%; height: 50%; background: rgba(168,85,247,0.05); filter: blur(120px); border-radius: 50%; pointer-events: none; }
+  .glass-card { background: rgba(255,255,255,0.02); backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.05); }
+
+  .scan-container { text-align: center; max-width: 500px; padding: 24px; position: relative; z-index: 1; }
+
+  /* Scanner visual */
+  .scanner { width: 240px; height: 240px; margin: 0 auto 48px; position: relative; }
+  .scanner-ring { position: absolute; inset: 0; border: 2px solid rgba(99,102,241,0.15); border-radius: 50%; }
+  .scanner-ring-inner { position: absolute; inset: 20px; border: 2px solid rgba(99,102,241,0.1); border-radius: 50%; }
+  .scanner-ring-core { position: absolute; inset: 40px; border: 2px solid rgba(99,102,241,0.08); border-radius: 50%; }
+
+  /* Spinning line */
+  .scanner-line { position: absolute; top: 50%; left: 50%; width: 50%; height: 2px; transform-origin: left center; background: linear-gradient(90deg, #6366f1, transparent); animation: spin 2s linear infinite; }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  /* Center icon */
+  .scanner-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; border-radius: 28px; background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.2); display: flex; align-items: center; justify-content: center; font-size: 36px; animation: pulse-icon 2s ease-in-out infinite; }
+  @keyframes pulse-icon { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.08); } }
+
+  /* Floating dots */
+  .dot { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: #6366f1; animation: float-dot 3s ease-in-out infinite; }
+  .dot-1 { top: 10%; left: 20%; animation-delay: 0s; }
+  .dot-2 { top: 30%; right: 10%; animation-delay: 0.5s; }
+  .dot-3 { bottom: 15%; left: 15%; animation-delay: 1s; }
+  .dot-4 { bottom: 25%; right: 20%; animation-delay: 1.5s; }
+  @keyframes float-dot { 0%, 100% { opacity: 0.2; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.5); } }
+
+  /* Steps */
+  .scan-steps { margin-bottom: 40px; }
+  .step { display: flex; align-items: center; gap: 16px; padding: 12px 0; }
+  .step-icon { width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .step-done .step-icon { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.25); }
+  .step-active .step-icon { background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.25); animation: pulse-step 1.5s ease-in-out infinite; }
+  .step-pending .step-icon { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); }
+  @keyframes pulse-step { 0%, 100% { box-shadow: 0 0 0 0 rgba(99,102,241,0.3); } 50% { box-shadow: 0 0 0 8px rgba(99,102,241,0); } }
+
+  .step-text { text-align: left; }
+  .step-label { font-size: 13px; font-weight: 800; }
+  .step-done .step-label { color: #10b981; }
+  .step-active .step-label { color: #818cf8; }
+  .step-pending .step-label { color: #334155; }
+  .step-desc { font-size: 11px; color: #475569; font-weight: 500; margin-top: 2px; }
+  .step-done .step-desc { color: #065f46; }
+
+  /* Progress bar */
+  .progress-wrap { margin-bottom: 24px; }
+  .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; width: 60%; background: linear-gradient(90deg, #4f46e5, #818cf8); border-radius: 2px; animation: progress 8s ease-in-out forwards; }
+  @keyframes progress { from { width: 0%; } to { width: 100%; } }
+
+  .scan-hotel { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: #475569; margin-bottom: 8px; }
+  .scan-title { font-size: 24px; font-weight: 900; font-style: italic; margin-bottom: 32px; }
+</style>
+</head>
+<body>
+
+<div class="glow-1"></div>
+<div class="glow-2"></div>
+
+<div class="scan-container">
+  <!-- Scanner visual -->
+  <div class="scanner">
+    <div class="scanner-ring"></div>
+    <div class="scanner-ring-inner"></div>
+    <div class="scanner-ring-core"></div>
+    <div class="scanner-line"></div>
+    <div class="scanner-icon">&#x1F50D;</div>
+    <div class="dot dot-1"></div>
+    <div class="dot dot-2"></div>
+    <div class="dot dot-3"></div>
+    <div class="dot dot-4"></div>
+  </div>
+
+  <div class="scan-hotel">Analiza u toku</div>
+  <div class="scan-title">Alexander The Great Hotel</div>
+
+  <!-- Progress bar -->
+  <div class="progress-wrap">
+    <div class="progress-bar">
+      <div class="progress-fill"></div>
+    </div>
+  </div>
+
+  <!-- Steps -->
+  <div class="scan-steps">
+    <div class="step step-done">
+      <div class="step-icon">&#x2713;</div>
+      <div class="step-text">
+        <div class="step-label">Google Places pronađen</div>
+        <div class="step-desc">Verifikovan sa 2,450 recenzija</div>
+      </div>
+    </div>
+    <div class="step step-done">
+      <div class="step-icon">&#x2713;</div>
+      <div class="step-text">
+        <div class="step-label">Recenzije preuzete</div>
+        <div class="step-desc">RS, EN, DE, GR jezici detektovani</div>
+      </div>
+    </div>
+    <div class="step step-active">
+      <div class="step-icon">&#x1F916;</div>
+      <div class="step-text">
+        <div class="step-label">Gemini analizira recenzije...</div>
+        <div class="step-desc">Sentiment analiza na 4 jezika</div>
+      </div>
+    </div>
+    <div class="step step-pending">
+      <div class="step-icon">&#x2022;</div>
+      <div class="step-text">
+        <div class="step-label">Claude kreira finalni izveštaj</div>
+        <div class="step-desc">Cross-reference sa nearby mestima</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
