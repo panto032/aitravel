@@ -17,19 +17,19 @@ export function Button({
   ...props
 }: ButtonProps) {
   const base =
-    "w-full py-4 px-6 rounded-2xl font-semibold text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed";
+    "w-full py-4 px-6 rounded-2xl font-black uppercase tracking-widest text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed";
 
   const variants = {
     primary:
-      "bg-gradient-to-r from-primary to-accent text-white shadow-lg shadow-primary/20 hover:shadow-primary/40",
+      "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 btn-glow",
     secondary:
-      "bg-surface-light border border-surface-lighter text-white hover:border-primary/50",
-    ghost: "bg-transparent text-gray-400 hover:text-white",
+      "glass-card text-[var(--text-primary)] hover:border-indigo-500/50",
+    ghost: "bg-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]",
   };
 
   return (
     <motion.button
-      whileTap={{ scale: 0.98 }}
+      whileTap={{ scale: 0.95 }}
       className={`${base} ${variants[variant]} ${className}`}
       disabled={disabled || loading}
       {...(props as React.ComponentProps<typeof motion.button>)}

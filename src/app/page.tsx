@@ -3,9 +3,13 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
-  Target, ArrowRight, Sparkles, Search, MapPin, Wifi, Coffee, Bed,
-  Users, Star, Shield, TrendingUp, Check, X as XIcon, ChevronRight,
+  ArrowRight, Sparkles, Search, MapPin, Wifi, Coffee, Bed,
+  Users, Star, Shield, Check, X as XIcon, ChevronRight,
+  Waves, ShieldAlert, Utensils, Coins, Fingerprint,
+  CheckCircle2, Zap, MessageSquare, Sun, Moon,
 } from "lucide-react";
+import { useTheme } from "@/lib/theme";
+import { FooterSignature } from "@/components/ui/FooterSignature";
 
 interface ShowcaseHotel {
   id: string;
@@ -65,9 +69,11 @@ function CountUp({ end, suffix = "" }: { end: number; suffix?: string }) {
 function PreviewModal({
   hotel,
   onClose,
+  isDark,
 }: {
   hotel: ShowcaseHotel;
   onClose: () => void;
+  isDark: boolean;
 }) {
   const scoreColor =
     (hotel.aiScore || 0) >= 8
@@ -78,69 +84,56 @@ function PreviewModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[300] flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/80 backdrop-blur-md z-[300] flex items-center justify-center p-4"
       onClick={onClose}
     >
       <div
-        className="glass-card rounded-[35px] max-w-md w-full p-8 border-white/10 animate-fade-in-up"
+        className={`glass-card rounded-[40px] max-w-lg w-full p-10 animate-fade-in-up ${
+          isDark ? "border-white/10" : "border-black/5"
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <h3 className="text-xl font-black text-white">{hotel.name}</h3>
-            <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">
-              {hotel.location}
-            </p>
+        <div className="flex justify-between items-start mb-8">
+          <div className="flex items-center gap-6">
+            <div className={`text-5xl font-black italic ${scoreColor} drop-shadow-lg leading-none`}>
+              {(hotel.aiScore || 0).toFixed(1)}
+            </div>
+            <div>
+              <h3 className={`text-xl font-black uppercase tracking-tight italic ${isDark ? "text-white" : "text-slate-900"}`}>
+                {hotel.name}
+              </h3>
+              <p className="text-[10px] text-indigo-400 font-black uppercase tracking-[0.3em] mt-1">
+                AI Detektivski Sken
+              </p>
+            </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10"
+            className="text-slate-500 hover:text-indigo-500 transition-colors cursor-pointer"
           >
-            <XIcon size={16} className="text-slate-400" />
+            <XIcon size={24} />
           </button>
         </div>
 
-        {/* AI Score */}
-        <div className="text-center mb-6">
-          <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">
-            AI Trust Rating
-          </div>
-          <div className={`text-5xl font-black italic ${scoreColor}`}>
-            {(hotel.aiScore || 0).toFixed(1)}
-          </div>
-          <div className="text-xs text-slate-600 mt-1">/10</div>
-        </div>
-
-        {/* Top 3 Categories */}
+        {/* Top Categories */}
         {hotel.topScores.length > 0 && (
-          <div className="space-y-3 mb-6">
-            {hotel.topScores.map((s) => (
-              <div key={s.category} className="flex items-center justify-between">
-                <span className="text-sm text-slate-400 font-medium">{s.category}</span>
-                <div className="flex items-center gap-2">
-                  <div className="w-24 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full ${
-                        s.score >= 8
-                          ? "bg-emerald-500"
-                          : s.score >= 6
-                            ? "bg-amber-500"
-                            : "bg-rose-500"
-                      }`}
-                      style={{ width: `${s.score * 10}%` }}
-                    />
-                  </div>
-                  <span className="text-white font-bold text-sm w-8 text-right">
-                    {s.score.toFixed(1)}
-                  </span>
+          <div className="grid grid-cols-2 gap-4 mb-8">
+            {hotel.topScores.slice(0, 4).map((s) => {
+              const catColor = s.score >= 8 ? "emerald" : s.score >= 6 ? "amber" : "rose";
+              return (
+                <div
+                  key={s.category}
+                  className={`glass-card p-4 rounded-2xl border-${catColor}-500/20 text-${catColor}-500 text-[10px] font-black uppercase tracking-widest text-center`}
+                >
+                  {s.category} {s.score.toFixed(1)}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
         {/* Pros / Cons */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-2 gap-4 mb-8">
           <div>
             <div className="text-[10px] text-emerald-400 font-black uppercase tracking-widest mb-2">
               Prednosti
@@ -148,7 +141,7 @@ function PreviewModal({
             {hotel.pros.map((p, i) => (
               <div key={i} className="flex items-start gap-1.5 mb-1">
                 <div className="w-1 h-1 rounded-full bg-emerald-400 mt-1.5 flex-shrink-0" />
-                <span className="text-xs text-slate-400">{p}</span>
+                <span className={`text-xs ${isDark ? "text-slate-400" : "text-slate-600"}`}>{p}</span>
               </div>
             ))}
           </div>
@@ -159,7 +152,7 @@ function PreviewModal({
             {hotel.cons.map((c, i) => (
               <div key={i} className="flex items-start gap-1.5 mb-1">
                 <div className="w-1 h-1 rounded-full bg-rose-400 mt-1.5 flex-shrink-0" />
-                <span className="text-xs text-slate-400">{c}</span>
+                <span className={`text-xs ${isDark ? "text-slate-400" : "text-slate-600"}`}>{c}</span>
               </div>
             ))}
           </div>
@@ -167,11 +160,11 @@ function PreviewModal({
 
         <Link
           href="/register"
-          className="w-full h-12 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all"
+          className="btn-glow w-full h-14 bg-indigo-600 text-white rounded-[22px] font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all"
         >
-          Kreiraj besplatan nalog <ArrowRight size={16} />
+          Prikaži kompletan dosije
         </Link>
-        <p className="text-center text-[10px] text-slate-600 mt-3">
+        <p className={`text-center text-[10px] mt-4 ${isDark ? "text-slate-600" : "text-slate-400"}`}>
           Za kompletnu analizu sa svim kategorijama
         </p>
       </div>
@@ -180,18 +173,27 @@ function PreviewModal({
 }
 
 const categoryShowcase = [
-  { icon: <MapPin size={20} />, name: "Lokacija", score: "8.5" },
-  { icon: <Sparkles size={20} />, name: "Čistoća", score: "7.2" },
-  { icon: <Users size={20} />, name: "Osoblje", score: "9.0" },
-  { icon: <Bed size={20} />, name: "Sobe", score: "6.5" },
-  { icon: <Coffee size={20} />, name: "Doručak", score: "4.0" },
-  { icon: <Wifi size={20} />, name: "WiFi", score: "3.5" },
-  { icon: <Star size={20} />, name: "Vrednost", score: "7.8" },
+  { icon: <Waves size={20} />, name: "Lokacija" },
+  { icon: <ShieldAlert size={20} />, name: "Bezbednost" },
+  { icon: <Bed size={20} />, name: "San" },
+  { icon: <Coffee size={20} />, name: "Hrana" },
+  { icon: <Wifi size={20} />, name: "Wi-Fi" },
+  { icon: <Utensils size={20} />, name: "Nearby" },
+  { icon: <Coins size={20} />, name: "Vrednost" },
+];
+
+const testimonials = [
+  { user: "Marko P.", text: "Konacno neko ko mi kaze istinu pre nego sto uplatim. AI je tacno predvideo problem sa liftom.", loc: "Beograd" },
+  { user: "Jelena M.", text: "Skenirala sam hotel koji posecujem godinama - AI je izvukao tacno ono sto i ja mislim!", loc: "Novi Sad" },
+  { user: "Dragan S.", text: "Interfejs je buducnost. Brzo, jasno i sustinski vazno za svakog putnika.", loc: "Nis" },
+  { user: "Ana K.", text: "Vise ne rezervisem dok ne proverim ovde. Ustedelo mi je bar 200EUR proslog meseca.", loc: "Zagreb" },
 ];
 
 export default function LandingPage() {
   const [showcase, setShowcase] = useState<ShowcaseData | null>(null);
   const [selectedHotel, setSelectedHotel] = useState<ShowcaseHotel | null>(null);
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === "dark";
 
   useEffect(() => {
     fetch("/api/public/showcase")
@@ -207,396 +209,389 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#020205] text-slate-100 relative overflow-hidden">
-      {/* Background glows */}
-      <div className="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-500/10 blur-[120px] pointer-events-none rounded-full" />
-      <div className="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-500/10 blur-[120px] pointer-events-none rounded-full" />
+    <div className={`min-h-screen transition-colors duration-700 selection:bg-indigo-500/30 overflow-x-hidden ${isDark ? "bg-[#020205] text-slate-100" : "bg-slate-50 text-slate-900"}`}>
+      {/* Ambient Lights */}
+      <div className={`fixed top-[-10%] left-[-10%] w-[60%] h-[60%] blur-[120px] pointer-events-none rounded-full transition-opacity duration-1000 ${isDark ? "bg-indigo-600/5 opacity-100" : "bg-indigo-500/10 opacity-40"}`} />
+      <div className={`fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] blur-[120px] pointer-events-none rounded-full transition-opacity duration-1000 ${isDark ? "bg-purple-600/5 opacity-100" : "bg-purple-500/10 opacity-40"}`} />
 
-      {/* Header */}
-      <header className="h-20 px-6 md:px-10 flex justify-between items-center relative z-10 max-w-7xl mx-auto">
-        <div className="text-xl font-black tracking-tighter italic flex items-center gap-2">
-          <Target size={24} className="text-indigo-500" />
-          Travel<span className="text-indigo-500 underline decoration-4 underline-offset-4">AI</span>
+      {/* HEADER */}
+      <header className={`h-16 md:h-24 px-4 md:px-10 flex justify-between items-center z-[100] sticky top-0 backdrop-blur-xl border-b transition-all ${isDark ? "bg-[#020205]/60 border-white/5 shadow-2xl shadow-black/20" : "bg-white/70 border-black/5 shadow-sm"}`}>
+        <div className={`text-xl md:text-3xl font-black tracking-tight italic ${isDark ? "text-white" : "text-slate-900"}`}>
+          Travel<span className="text-indigo-500 underline decoration-2 md:decoration-4 underline-offset-4">AI</span>
         </div>
-        <Link
-          href="/login"
-          className="text-sm text-slate-500 hover:text-white transition-colors font-bold"
-        >
-          Prijavi se
-        </Link>
+        <div className="flex items-center gap-2 md:gap-4">
+          <button
+            onClick={toggleTheme}
+            className={`p-2.5 md:p-3 rounded-xl transition-all border cursor-pointer ${isDark ? "bg-white/5 border-white/10 text-slate-400 hover:text-yellow-400" : "bg-black/5 border-black/5 text-slate-600 hover:text-indigo-600"}`}
+          >
+            {isDark ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+          <Link
+            href="/login"
+            className="btn-glow bg-indigo-600 text-white px-5 md:px-10 py-2.5 rounded-2xl font-bold text-xs md:text-sm uppercase tracking-widest active:scale-95 transition-all"
+          >
+            Prijavi se
+          </Link>
+        </div>
       </header>
 
-      {/* SECTION 1: Hero */}
-      <section className="flex flex-col items-center justify-center px-6 text-center pt-16 md:pt-24 pb-20 relative z-10">
-        <div className="max-w-3xl animate-fade-in-up">
-          <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-5 py-2.5 mb-8">
-            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">
+      <div className="max-w-7xl mx-auto relative">
+        {/* 1. HERO */}
+        <section className="text-center pt-16 md:pt-32 pb-32 px-6">
+          <div className="inline-flex items-center gap-2 bg-emerald-500/10 text-emerald-500 px-5 py-2 rounded-full border border-emerald-500/20 mb-10 animate-bounce shadow-lg shadow-emerald-500/5">
+            <span className="text-[10px] font-black uppercase tracking-widest leading-none italic">
               Besplatno — Zauvek
             </span>
           </div>
-
-          <h1 className="text-5xl sm:text-6xl md:text-8xl font-black leading-[1.0] tracking-tighter mb-6 text-gradient italic">
-            Putuj bez maski.
+          <h1 className="text-gradient text-5xl sm:text-7xl md:text-[110px] font-black leading-[0.85] tracking-tighter uppercase italic mb-10">
+            Putuj bez <br />
+            <span className="text-indigo-500 underline decoration-indigo-500/20 underline-offset-[12px]">
+              maski.
+            </span>
           </h1>
-
-          <p className="text-slate-500 text-base md:text-xl leading-relaxed font-medium mb-12 max-w-xl mx-auto">
-            Prva platforma koja analizira hiljade recenzija pomoću AI agenata
-            kako bi ti pokazala šta se stvarno dešava u hotelu.
+          <p className={`text-lg md:text-2xl mb-16 max-w-2xl mx-auto leading-relaxed font-semibold italic ${isDark ? "text-slate-500" : "text-slate-600"}`}>
+            Prva platforma koja analizira hiljade recenzija pomocu AI agenata
+            kako bi ti pokazala sta se stvarno desava u hotelu.
           </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-6 mb-20">
             <Link
               href="/register"
-              className="h-14 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 px-8 active:scale-95 transition-all shadow-lg shadow-indigo-600/20 hover:shadow-indigo-500/40"
+              className="btn-glow w-full md:w-auto bg-indigo-600 text-white px-14 py-6 rounded-[28px] font-black text-sm uppercase tracking-widest shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3"
             >
-              <Search size={18} /> Kreiraj besplatan nalog
+              <Search size={18} /> Zapocni istragu
             </Link>
             <Link
               href="/login"
-              className="h-14 glass-card rounded-2xl font-bold text-sm text-slate-400 flex items-center justify-center gap-3 px-8 hover:bg-white/5 transition-all"
+              className={`w-full md:w-auto px-14 py-6 rounded-[28px] font-black text-sm uppercase tracking-widest border transition-all text-center ${isDark ? "border-white/10 hover:bg-white/5 text-white" : "border-black/10 hover:bg-black/5 text-slate-900 shadow-xl"}`}
             >
-              Već imam nalog
+              Vec imam nalog
             </Link>
           </div>
-        </div>
-      </section>
 
-      {/* SECTION 2: How it works */}
-      <section className="px-6 pb-24 relative z-10 max-w-5xl mx-auto">
-        <h2 className="text-2xl md:text-4xl font-black italic tracking-tighter text-center mb-12">
-          Kako TravelAI razbija predrasude?
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            {
-              step: "1",
-              title: "Pretraži hotel",
-              desc: "Ukucaj ime hotela ili destinaciju. AI pronalazi sve dostupne podatke.",
-              icon: <Search size={28} />,
-            },
-            {
-              step: "2",
-              title: "AI čita hiljade recenzija",
-              desc: "3 AI agenta analiziraju sve u sekundama — na 5+ jezika, sa detekcijom sarkazma.",
-              icon: <Sparkles size={28} />,
-            },
-            {
-              step: "3",
-              title: "Dobijaš iskrenu analizu",
-              desc: "Sa pravim citatima, ocenama po kategorijama, i nearby preporukama.",
-              icon: <Shield size={28} />,
-            },
-          ].map((item) => (
-            <div
-              key={item.step}
-              className="glass-card rounded-[28px] p-8 text-center group hover:bg-white/5 transition-all"
-            >
-              <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-indigo-500/15 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
-                {item.icon}
-              </div>
-              <div className="text-xs font-black text-indigo-400 tracking-widest uppercase mb-3">
-                Korak {item.step}
-              </div>
-              <h3 className="text-lg font-bold text-white mb-2">{item.title}</h3>
-              <p className="text-sm text-slate-500 leading-relaxed">{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* SECTION 3: Stats */}
-      <section className="px-6 pb-24 relative z-10 max-w-5xl mx-auto">
-        <h2 className="text-2xl md:text-4xl font-black italic tracking-tighter text-center mb-12">
-          Brojke ne lažu.
-        </h2>
-        <div className="grid grid-cols-3 gap-4 md:gap-8">
-          {[
-            {
-              value: Math.max(stats.totalReviews, 1000),
-              suffix: "+",
-              label: "recenzija analizirano",
-            },
-            {
-              value: Math.max(stats.totalHotels, 50),
-              suffix: "+",
-              label: "hotela ocenjeno",
-            },
-            {
-              value: Math.max(stats.totalLocations, 10),
-              suffix: "+",
-              label: "destinacija pokriveno",
-            },
-          ].map((s) => (
-            <div
-              key={s.label}
-              className="glass-card rounded-[28px] p-6 md:p-8 text-center"
-            >
-              <div className="text-3xl md:text-5xl font-black italic text-white mb-2">
-                <CountUp end={s.value} suffix={s.suffix} />
-              </div>
-              <div className="text-[10px] md:text-xs font-black text-slate-500 uppercase tracking-widest">
-                {s.label}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* SECTION 4: Showcase */}
-      {showcase && showcase.hotels.length > 0 && (
-        <section className="px-6 pb-24 relative z-10 max-w-6xl mx-auto">
-          <h2 className="text-2xl md:text-4xl font-black italic tracking-tighter text-center mb-4">
-            Pogledaj šta su naši korisnici otkrili
-          </h2>
-          <p className="text-slate-500 text-sm text-center mb-12">
-            Pravi hoteli, prave recenzije, prave ocene.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {showcase.hotels.slice(0, 6).map((hotel) => {
-              const scoreColor =
-                (hotel.aiScore || 0) >= 8
-                  ? "text-emerald-400"
-                  : (hotel.aiScore || 0) >= 6
-                    ? "text-amber-400"
-                    : "text-rose-400";
-
-              return (
-                <div
-                  key={hotel.id}
-                  className="glass-card rounded-[28px] overflow-hidden group hover:border-indigo-500/30 transition-all cursor-pointer"
-                  onClick={() => setSelectedHotel(hotel)}
-                >
-                  {/* Photo */}
-                  <div className="h-40 bg-slate-900 relative overflow-hidden">
-                    {hotel.photoUrl ? (
-                      <img
-                        src={hotel.photoUrl}
-                        alt={hotel.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <MapPin size={32} className="text-slate-700" />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#020205] via-transparent to-transparent" />
-                  </div>
-
-                  <div className="p-5">
-                    <h3 className="text-base font-bold text-white mb-0.5">
-                      {hotel.name}
-                    </h3>
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-3">
-                      {hotel.location}
-                    </p>
-
-                    <div className="flex items-center gap-4 mb-3">
-                      {hotel.googleRating && (
-                        <div className="flex items-center gap-1">
-                          <Star size={12} className="text-amber-400" fill="currentColor" />
-                          <span className="text-sm font-bold text-white">
-                            {hotel.googleRating.toFixed(1)}
-                          </span>
-                          <span className="text-[10px] text-slate-600">Google</span>
-                        </div>
-                      )}
-                      <div className="flex items-center gap-1">
-                        <Sparkles size={12} className="text-indigo-400" />
-                        <span className={`text-sm font-bold ${scoreColor}`}>
-                          {(hotel.aiScore || 0).toFixed(1)}
-                        </span>
-                        <span className="text-[10px] text-slate-600">AI</span>
-                      </div>
-                    </div>
-
-                    {hotel.googleReviewCount && (
-                      <p className="text-[10px] text-slate-600 mb-3">
-                        {hotel.googleReviewCount.toLocaleString("sr-RS")} recenzija
-                      </p>
-                    )}
-
-                    {hotel.summary && (
-                      <p className="text-xs text-slate-500 italic line-clamp-2 mb-3">
-                        &quot;{hotel.summary}&quot;
-                      </p>
-                    )}
-
-                    <button className="text-[10px] font-black text-indigo-400 uppercase tracking-widest flex items-center gap-1 hover:text-white transition-colors">
-                      Vidi analizu <ChevronRight size={12} />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
-      {/* SECTION 5: What we analyze */}
-      <section className="px-6 pb-24 relative z-10 max-w-5xl mx-auto">
-        <h2 className="text-2xl md:text-4xl font-black italic tracking-tighter text-center mb-4">
-          Duboka analiza — ne samo ocena
-        </h2>
-        <p className="text-slate-500 text-sm text-center mb-12">
-          7 kategorija, pravi citati, trendovi, cross-reference sa okolinom.
-        </p>
-
-        <div className="grid grid-cols-4 md:grid-cols-7 gap-3 mb-8">
-          {categoryShowcase.map((cat) => {
-            const score = parseFloat(cat.score);
-            const color =
-              score >= 8
-                ? "text-emerald-400 border-emerald-500/20"
-                : score >= 6
-                  ? "text-white border-white/10"
-                  : score >= 4
-                    ? "text-amber-400 border-amber-500/20"
-                    : "text-rose-400 border-rose-500/20";
-            return (
-              <div
-                key={cat.name}
-                className={`glass-card rounded-[20px] p-4 text-center border ${color.split(" ")[1]}`}
-              >
-                <div className="text-indigo-400 flex justify-center mb-2">
-                  {cat.icon}
-                </div>
-                <div className={`text-lg font-black italic mb-1 ${color.split(" ")[0]}`}>
-                  {cat.score}
-                </div>
-                <div className="text-[8px] font-black text-slate-600 uppercase tracking-widest">
-                  {cat.name}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="flex flex-wrap justify-center gap-3">
-          {["Nearby preporuke", "AI Secret Tip", "Trend analiza", "Uporedi hotele"].map(
-            (f) => (
-              <span
-                key={f}
-                className="glass-card px-4 py-2 rounded-full text-[10px] font-black text-indigo-400 uppercase tracking-widest"
-              >
-                + {f}
-              </span>
-            )
-          )}
-        </div>
-      </section>
-
-      {/* SECTION 6: Free forever */}
-      <section className="px-6 pb-24 relative z-10 max-w-3xl mx-auto">
-        <div className="glass-card rounded-[35px] p-8 md:p-12 text-center border-emerald-500/20 bg-emerald-500/[0.02]">
-          <h2 className="text-3xl md:text-4xl font-black italic tracking-tighter mb-8">
-            Potpuno besplatno. Zauvek.
-          </h2>
-
-          <div className="space-y-3 text-left max-w-sm mx-auto mb-8">
+          {/* Demo cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {[
-              "10 pretraga mesečno — besplatno",
-              "Detaljna AI analiza — besplatno",
-              "Čuvaj omiljene hotele — besplatno",
-              "Uporedi hotele — besplatno",
-              "Google verifikovani podaci",
-            ].map((feat) => (
-              <div key={feat} className="flex items-center gap-3">
-                <Check size={16} className="text-emerald-400 flex-shrink-0" />
-                <span className="text-sm text-slate-300 font-medium">{feat}</span>
+              { name: "Vila Kostas", loc: "Hanioti", issue: "Otkrivena Buka", score: "8.7", color: "rose" },
+              { name: "Hotel Aegean", loc: "Kallithea", issue: "Lazne Slike", score: "6.4", color: "amber" },
+              { name: "Ikos Olivia", loc: "Gerakini", issue: "Top Favorit", score: "9.4", color: "emerald" },
+            ].map((card) => (
+              <div
+                key={card.name}
+                className="glass-card p-6 rounded-[35px] hover:border-indigo-500/40 hover:-translate-y-2 transition-all text-left flex flex-col justify-between h-40 group shadow-xl cursor-pointer"
+              >
+                <div className="flex justify-between items-start">
+                  <div className={`w-10 h-10 rounded-xl bg-${card.color}-500/10 flex items-center justify-center text-${card.color}-500 font-black italic text-sm`}>
+                    {card.score}
+                  </div>
+                  <ArrowRight size={16} className="text-slate-700 group-hover:text-indigo-500 transition-colors" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className={`w-1.5 h-1.5 rounded-full bg-${card.color}-500`} />
+                    <span className={`text-[9px] font-black uppercase tracking-widest text-${card.color}-500 italic`}>
+                      {card.issue}
+                    </span>
+                  </div>
+                  <h4 className={`text-lg font-black uppercase tracking-tight italic leading-none ${isDark ? "text-white" : "text-slate-900"}`}>
+                    {card.name}
+                  </h4>
+                  <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-1 italic">
+                    {card.loc}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
+        </section>
 
-          <Link
-            href="/register"
-            className="inline-flex h-14 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest items-center justify-center gap-3 px-10 active:scale-95 transition-all shadow-lg shadow-indigo-600/20 hover:shadow-indigo-500/40"
-          >
-            Kreiraj besplatan nalog <ArrowRight size={18} />
-          </Link>
-
-          <p className="text-slate-600 text-xs mt-6">
-            Premium: Neograničene pretrage za samo €4.99/mesečno
-          </p>
-        </div>
-      </section>
-
-      {/* SECTION 7: Social proof */}
-      <section className="px-6 pb-24 relative z-10 max-w-5xl mx-auto">
-        <h2 className="text-xl md:text-2xl font-black italic tracking-tighter text-center mb-10">
-          Koriste ga putnici iz celog regiona
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* 2. KAKO RADI */}
+        <section className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 mb-32 md:mb-48">
           {[
-            {
-              text: "Konačno neko ko mi kaže istinu o hotelu pre nego dam pare.",
-              author: "Marko",
-              city: "Beograd",
-            },
-            {
-              text: "Doručak u hotelu je bio katastrofa — tačno kako je AI predvideo.",
-              author: "Ana",
-              city: "Zagreb",
-            },
-          ].map((t) => (
-            <div
-              key={t.author}
-              className="glass-card rounded-[28px] p-6 md:p-8"
-            >
-              <p className="text-sm text-slate-300 italic leading-relaxed mb-4">
-                &quot;{t.text}&quot;
-              </p>
-              <p className="text-xs text-slate-600 font-bold">
-                — {t.author}, {t.city}
+            { num: "1", title: "Pretrazi", text: "Ukucaj ime ili link bilo kog hotela. Nas sistem pronalazi verifikovane podatke.", icon: <Search className="text-indigo-500" size={24} /> },
+            { num: "2", title: "Analiza", text: "AI agenti analiziraju sve: od buke do kvaliteta duseka u sekundi.", icon: <Fingerprint className="text-purple-500" size={24} /> },
+            { num: "3", title: "Istina", text: "Dobijas izvestaj koji razbija marketing. Saznaj sta se krije iza lepih slika.", icon: <Shield className="text-emerald-500" size={24} /> },
+          ].map((step) => (
+            <div key={step.num} className="glass-card p-10 rounded-[45px] hover:border-indigo-500/40 transition-all group relative overflow-hidden">
+              <div className="flex justify-between items-start mb-8 relative z-10">
+                <div className="w-14 h-14 bg-indigo-500/10 rounded-2xl flex items-center justify-center group-hover:bg-indigo-500/20 transition-all border border-indigo-500/20 shadow-lg">
+                  {step.icon}
+                </div>
+                <span className="text-5xl font-black italic opacity-10 leading-none tracking-tighter">
+                  {step.num}
+                </span>
+              </div>
+              <h4 className={`text-xl font-black mb-4 uppercase tracking-tighter italic leading-none ${isDark ? "text-white" : "text-slate-900"}`}>
+                {step.title}
+              </h4>
+              <p className={`text-sm font-medium leading-relaxed italic ${isDark ? "text-slate-500" : "text-slate-600"}`}>
+                {step.text}
               </p>
             </div>
           ))}
-        </div>
-      </section>
+        </section>
 
-      {/* SECTION 8: Footer CTA */}
-      <section className="px-6 pb-16 relative z-10 text-center">
-        <h2 className="text-3xl md:text-5xl font-black italic tracking-tighter mb-6 text-gradient">
-          Ne putuj naslepo.
-        </h2>
-        <Link
-          href="/register"
-          className="inline-flex h-14 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest items-center justify-center gap-3 px-10 active:scale-95 transition-all shadow-lg shadow-indigo-600/20 hover:shadow-indigo-500/40 mb-8"
-        >
-          Kreiraj besplatan nalog — za 30 sekundi
-        </Link>
-        <div className="text-slate-700 text-xs font-medium space-y-2">
-          <div className="flex items-center justify-center gap-3">
-            <Link href="/uslovi" className="hover:text-indigo-400 transition-colors">
-              Uslovi korišćenja
-            </Link>
-            <span>|</span>
-            <Link href="/privatnost" className="hover:text-indigo-400 transition-colors">
-              Politika privatnosti
-            </Link>
-            <span>|</span>
-            <Link href="/o-nama" className="hover:text-indigo-400 transition-colors">
-              O nama
-            </Link>
+        {/* 3. STATS */}
+        <section className="glass-card p-12 md:p-24 rounded-[60px] text-center border-indigo-500/10 mx-6 mb-32 md:mb-48 relative z-10">
+          <div className="text-[10px] font-black uppercase tracking-[0.5em] text-indigo-500 mb-12 italic opacity-80 leading-none">
+            Status Sistema
           </div>
-          <p>
-            TravelAI © 2026 — Kreirao{" "}
-            <a href="https://impulsee.cloud" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline">
-              IMPULSE
-            </a>{" "}
-            part of{" "}
-            <a href="https://impuls-tech.rs" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline">
-              IMPULS TECH DOO
-            </a>
-          </p>
-        </div>
-      </section>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            {[
+              { val: Math.max(stats.totalReviews, 1000), suffix: "+", label: "Recenzija Analizirano" },
+              { val: Math.max(stats.totalHotels, 50), suffix: "+", label: "Verifikovanih Hotela" },
+              { val: Math.max(stats.totalLocations, 10), suffix: "+", label: "Pokrivenih Destinacija" },
+            ].map((s) => (
+              <div key={s.label} className="group cursor-default">
+                <div className={`text-3xl md:text-5xl font-black italic tracking-tighter mb-4 transition-all group-hover:text-indigo-500 group-hover:scale-105 duration-700 ${isDark ? "text-white" : "text-slate-900"}`}>
+                  <CountUp end={s.val} suffix={s.suffix} />
+                </div>
+                <div className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-600 italic opacity-80">
+                  {s.label}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 4. SHOWCASE */}
+        {showcase && showcase.hotels.length > 0 && (
+          <section className="max-w-7xl mx-auto px-6 mb-32 md:mb-48">
+            <h2 className={`text-3xl md:text-5xl font-black italic tracking-tighter uppercase mb-16 ${isDark ? "text-white" : "text-slate-900"}`}>
+              Showcase Rezultati
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+              {showcase.hotels.slice(0, 3).map((hotel) => {
+                const scoreColor =
+                  (hotel.aiScore || 0) >= 8 ? "indigo" : (hotel.aiScore || 0) >= 6 ? "amber" : "rose";
+                const badge =
+                  (hotel.aiScore || 0) >= 8 ? "Best Value" : (hotel.aiScore || 0) >= 6 ? "Verified" : "Risk Alert";
+
+                return (
+                  <div
+                    key={hotel.id}
+                    onClick={() => setSelectedHotel(hotel)}
+                    className="glass-card rounded-[50px] overflow-hidden group cursor-pointer border-white/5 hover:-translate-y-2 transition-all"
+                  >
+                    <div className="h-64 bg-slate-900/50 relative p-10 flex flex-col justify-between overflow-hidden border-b border-white/5">
+                      {hotel.photoUrl && (
+                        <img
+                          src={hotel.photoUrl}
+                          alt={hotel.name}
+                          className="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:scale-105 transition-transform duration-500"
+                        />
+                      )}
+                      <div className={`absolute top-0 right-0 w-48 h-48 bg-${scoreColor}-500/10 blur-[70px] pointer-events-none transition-all duration-1000 group-hover:scale-150`} />
+                      <div className="flex justify-between items-start relative z-10">
+                        <div className={`bg-${scoreColor === "rose" ? "rose" : "indigo"}-600 text-white px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-xl`}>
+                          {badge}
+                        </div>
+                        <div className={`w-14 h-14 glass-card rounded-2xl flex items-center justify-center font-black italic text-xl text-${scoreColor === "rose" ? "rose" : "indigo"}-400 border-white/10`}>
+                          {(hotel.aiScore || 0).toFixed(1)}
+                        </div>
+                      </div>
+                      <h3 className="text-2xl font-black text-white italic leading-tight uppercase tracking-tighter relative z-10">
+                        {hotel.name}
+                      </h3>
+                    </div>
+                    <div className="p-10 relative">
+                      <p className={`text-[10px] font-bold uppercase tracking-widest mb-3 ${isDark ? "text-slate-600" : "text-slate-400"}`}>
+                        {hotel.location}
+                      </p>
+                      {hotel.summary && (
+                        <p className={`text-sm italic leading-relaxed mb-8 line-clamp-3 font-medium ${isDark ? "text-slate-500" : "text-slate-600"}`}>
+                          &quot;{hotel.summary}&quot;
+                        </p>
+                      )}
+                      <span className="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-500 flex items-center gap-4 group-hover:text-white transition-all italic leading-none group-hover:translate-x-2">
+                        DETALJI <ArrowRight size={16} />
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* 5. DUBOKA AI ANALIZA */}
+        <section className="max-w-7xl mx-auto px-6 mb-32 md:mb-48 text-center">
+          <h2 className={`text-3xl md:text-5xl font-black italic tracking-tighter uppercase mb-16 ${isDark ? "text-white" : "text-slate-900"}`}>
+            Duboka AI Analiza
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 px-2">
+            {categoryShowcase.map((cat) => (
+              <div
+                key={cat.name}
+                className="glass-card p-6 rounded-[35px] flex flex-col items-center gap-3 group hover:border-indigo-500/30 transition-all shadow-xl"
+              >
+                <div className="text-slate-500 group-hover:text-indigo-400 transition-all duration-500 group-hover:scale-110">
+                  {cat.icon}
+                </div>
+                <span className={`text-[9px] font-black uppercase tracking-widest group-hover:text-indigo-400 transition-colors leading-none italic ${isDark ? "text-slate-600" : "text-slate-400"}`}>
+                  {cat.name}
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 6. TESTIMONIALS */}
+        <section className="mb-32 md:mb-48 px-4">
+          <div className="max-w-7xl mx-auto text-center mb-16">
+            <h2 className={`text-3xl md:text-5xl font-black italic tracking-tighter uppercase ${isDark ? "text-white" : "text-slate-900"}`}>
+              Glas Putnika
+            </h2>
+            <p className="text-slate-500 font-bold text-xs uppercase tracking-widest mt-2 italic">
+              Sta kazu oni koji vise ne veruju marketingu
+            </p>
+          </div>
+          <div className="overflow-x-auto hide-scrollbar pb-4">
+            <div className="flex gap-6 px-4 w-max">
+              {testimonials.map((t) => (
+                <div
+                  key={t.user}
+                  className="glass-card p-10 rounded-[45px] w-80 md:w-96 flex flex-col justify-between border-white/5 shadow-2xl relative overflow-hidden flex-shrink-0"
+                >
+                  <div className="absolute top-0 right-0 p-6 opacity-5">
+                    <MessageSquare size={80} className="text-indigo-500" />
+                  </div>
+                  <div>
+                    <div className="flex gap-1 mb-6 text-yellow-500">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} size={14} fill="currentColor" />
+                      ))}
+                    </div>
+                    <p className={`text-base italic leading-relaxed mb-10 font-medium ${isDark ? "text-slate-300" : "text-slate-700"}`}>
+                      &quot;{t.text}&quot;
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-4 relative z-10">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-lg italic shadow-lg">
+                      {t.user[0]}
+                    </div>
+                    <div>
+                      <div className={`text-sm font-black uppercase tracking-widest italic ${isDark ? "text-white" : "text-slate-900"}`}>
+                        {t.user}
+                      </div>
+                      <div className="text-[9px] font-black text-slate-500 uppercase tracking-widest mt-1 opacity-60">
+                        {t.loc}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* 7. PRICING */}
+        <section className="max-w-7xl mx-auto px-6 mb-32 md:mb-48">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Free */}
+            <div className="glass-card p-10 md:p-16 rounded-[60px] border-indigo-500/10 relative overflow-hidden flex flex-col justify-between">
+              <div>
+                <h2 className={`text-4xl md:text-6xl font-black italic mb-8 leading-none uppercase tracking-tighter ${isDark ? "text-white" : "text-slate-900"}`}>
+                  BESPLATNO.<br />ZAUVEK.
+                </h2>
+                <div className="space-y-6 mb-12">
+                  {[
+                    "10 AI analiza mesecno besplatno",
+                    "Kompletan izvestaj o manama hotela",
+                    "Cuvanje omiljenih destinacija",
+                  ].map((feat) => (
+                    <div key={feat} className="flex items-center gap-4 group cursor-default">
+                      <div className="w-8 h-8 bg-emerald-500/10 text-emerald-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-all border border-emerald-500/20">
+                        <CheckCircle2 size={18} />
+                      </div>
+                      <span className={`text-base md:text-lg font-bold italic group-hover:text-white transition-colors leading-none tracking-tight ${isDark ? "text-slate-300" : "text-slate-700"}`}>
+                        {feat}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <Link
+                href="/register"
+                className="btn-glow bg-indigo-600 text-white px-12 py-5 rounded-[24px] font-black text-sm uppercase tracking-widest shadow-xl active:scale-95 transition-all text-center"
+              >
+                Kreiraj nalog besplatno
+              </Link>
+            </div>
+
+            {/* Premium */}
+            <div className="glass-card p-10 md:p-16 rounded-[60px] border-purple-500/20 bg-gradient-to-br from-purple-600/5 to-transparent relative overflow-hidden flex flex-col justify-between group">
+              <div className="absolute top-8 right-8 bg-purple-500 text-white px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest animate-pulse z-20 shadow-lg shadow-purple-500/20">
+                U PRIPREMI
+              </div>
+              <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none group-hover:rotate-12 transition-transform duration-1000 z-10">
+                <Zap size={200} />
+              </div>
+              <div className="relative z-10">
+                <h2 className={`text-4xl md:text-6xl font-black italic mb-2 leading-none uppercase tracking-tighter ${isDark ? "text-white" : "text-slate-900"}`}>
+                  PREMIUM.
+                </h2>
+                <div className="text-2xl font-black text-purple-400 mb-8 italic uppercase tracking-tight">
+                  590 RSD <span className="text-xs opacity-60">/ mesec</span>
+                </div>
+                <div className="space-y-6 mb-12">
+                  {[
+                    "Neogranicen broj izvestaja",
+                    "Kompletna istorija pretraga",
+                    "Ekskluzivni AI trendovi putovanja",
+                    "Prioritetna analiza novih hotela",
+                  ].map((feat) => (
+                    <div key={feat} className="flex items-center gap-4 group/item cursor-default">
+                      <div className="w-8 h-8 bg-purple-500/10 text-purple-500 rounded-xl flex items-center justify-center group-hover/item:scale-110 transition-all border border-purple-500/20">
+                        <CheckCircle2 size={18} />
+                      </div>
+                      <span className={`text-base md:text-lg font-bold italic group-hover/item:text-white transition-colors leading-none tracking-tight ${isDark ? "text-slate-300" : "text-slate-700"}`}>
+                        {feat}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <button
+                disabled
+                className="bg-white/5 border border-white/10 text-slate-500 px-12 py-5 rounded-[24px] font-black text-sm uppercase tracking-widest cursor-not-allowed italic"
+              >
+                Uskoro dostupno
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* 8. FOOTER */}
+        <footer className={`py-14 px-8 transition-colors border-t mt-10 ${isDark ? "border-white/5" : "border-black/5"}`}>
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+            <div className={`flex flex-wrap justify-center md:justify-start gap-8 text-[10px] font-black uppercase tracking-[0.2em] italic ${isDark ? "text-slate-500" : "text-slate-400"}`}>
+              <Link href="/uslovi" className="hover:text-indigo-500 transition-colors">
+                Uslovi Koriscenja
+              </Link>
+              <Link href="/privatnost" className="hover:text-indigo-500 transition-colors">
+                Politika Privatnosti
+              </Link>
+              <Link href="/o-nama" className="hover:text-indigo-500 transition-colors">
+                O nama
+              </Link>
+            </div>
+            <div className="text-center md:text-right">
+              <p className={`text-[10px] font-black uppercase tracking-[0.2em] italic leading-relaxed ${isDark ? "text-slate-600" : "text-slate-400"}`}>
+                TRAVELAI SYSTEM &copy; 2026 — KREIRAO{" "}
+                <span className="text-indigo-500">IMPULSE</span> PART OF{" "}
+                <span className="text-indigo-400 tracking-widest">IMPULS TECH DOO</span>
+              </p>
+            </div>
+          </div>
+        </footer>
+      </div>
 
       {/* Preview Modal */}
       {selectedHotel && (
         <PreviewModal
           hotel={selectedHotel}
           onClose={() => setSelectedHotel(null)}
+          isDark={isDark}
         />
       )}
     </div>

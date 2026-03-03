@@ -1,8 +1,16 @@
 import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "@/lib/theme";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin", "latin-ext"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  display: "swap",
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
   title: "TravelAI - Putuj bez maski",
@@ -28,8 +36,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="sr" className="dark">
-      <body className="antialiased">
+    <html lang="sr" className={`dark ${inter.variable}`}>
+      <body className="antialiased font-sans">
         <SessionProvider>
           <ThemeProvider>{children}</ThemeProvider>
           <ServiceWorkerRegister />

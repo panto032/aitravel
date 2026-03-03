@@ -6,9 +6,9 @@ export function Logo({ size = "default" }: { size?: "small" | "default" | "large
   };
 
   return (
-    <span className={`font-bold tracking-tight ${sizes[size]}`}>
+    <span className={`font-black tracking-tight ${sizes[size]}`}>
       Travel
-      <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+      <span className="text-indigo-500 underline decoration-2 underline-offset-4">
         AI
       </span>
     </span>
