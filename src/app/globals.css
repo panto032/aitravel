@@ -6,30 +6,70 @@
   --color-accent: #10b981;
   --color-accent-light: #34d399;
   --color-surface: #020205;
-  --color-surface-light: rgba(255, 255, 255, 0.03);
+  --color-surface-light: rgba(255, 255, 255, 0.02);
   --color-surface-lighter: rgba(255, 255, 255, 0.05);
   --color-danger: #f43f5e;
   --color-warning: #f59e0b;
 }
 
+/* Theme variables — dark is absolute default */
+:root,
+.dark {
+  --bg-primary: #020205;
+  --bg-card: rgba(255, 255, 255, 0.02);
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --border: rgba(255, 255, 255, 0.05);
+  --glass-bg: rgba(255, 255, 255, 0.02);
+  --glass-border: rgba(255, 255, 255, 0.05);
+  --glass-blur: 24px;
+  --glow-opacity: 0.05;
+}
+
+.light {
+  --bg-primary: #f8fafc;
+  --bg-card: rgba(0, 0, 0, 0.03);
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --border: rgba(0, 0, 0, 0.05);
+  --glass-bg: rgba(0, 0, 0, 0.03);
+  --glass-border: rgba(0, 0, 0, 0.05);
+  --glass-blur: 24px;
+  --glow-opacity: 0.1;
+}
+
 body {
-  background: #020205;
-  color: #f1f5f9;
+  background: var(--bg-primary);
+  color: var(--text-primary);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* Glass card */
+/* Glass card — matches original design exactly */
 .glass-card {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
 }
 
-/* Text gradient */
+/* Light theme glass gets subtle shadow */
+.light .glass-card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* Text gradient — matches original */
 .text-gradient {
-  background: linear-gradient(135deg, #fff 30%, #a5b4fc 100%);
+  background: linear-gradient(135deg, #fff 40%, #818cf8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.light .text-gradient {
+  background: linear-gradient(135deg, #1e1b4b 40%, #4f46e5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* Scrollbar hiding */
@@ -42,6 +82,12 @@ body {
 }
 
 /* Scanning animation */
+@keyframes scan-line {
+  0% { top: 0%; }
+  50% { top: 100%; }
+  100% { top: 0%; }
+}
+
 @keyframes scan-up-down {
   0%, 100% { transform: translateY(0); opacity: 0.2; }
   50% { transform: translateY(220px); opacity: 1; }
@@ -58,6 +104,15 @@ body {
 
 .scanning-line {
   animation: scan-up-down 2s ease-in-out infinite;
+}
+
+.scanning-active-line {
+  position: absolute;
+  height: 2px;
+  width: 100%;
+  background: #6366f1;
+  box-shadow: 0 0 15px #6366f1;
+  animation: scan-line 3s linear infinite;
 }
 
 /* Focus styles */
@@ -83,4 +138,57 @@ textarea:focus {
 
 .animate-fade-in {
   animation: fade-in 0.5s ease-out forwards;
+}
+
+/* Legal pages prose */
+.prose-legal h2 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  color: var(--text-primary);
+}
+
+.prose-legal h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.prose-legal p {
+  font-size: 0.875rem;
+  line-height: 1.75;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.prose-legal ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.prose-legal li {
+  font-size: 0.875rem;
+  line-height: 1.75;
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+}
+
+.prose-legal a {
+  color: #6366f1;
+}
+
+.prose-legal a:hover {
+  text-decoration: underline;
+}
+
+.prose-legal table {
+  width: 100%;
+}
+
+.prose-legal td {
+  color: var(--text-primary);
 }

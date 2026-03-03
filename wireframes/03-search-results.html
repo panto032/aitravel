@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TravelAI — Rezultati pretrage</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #020205; color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; overflow-x: hidden; min-height: 100vh; }
+  .glow-1 { position: fixed; top: -10%; left: -10%; width: 60%; height: 60%; background: rgba(99,102,241,0.05); filter: blur(120px); border-radius: 50%; pointer-events: none; }
+  .glow-2 { position: fixed; bottom: -10%; right: -10%; width: 50%; height: 50%; background: rgba(168,85,247,0.05); filter: blur(120px); border-radius: 50%; pointer-events: none; }
+  .glass-card { background: rgba(255,255,255,0.02); backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.05); }
+  .text-gradient { background: linear-gradient(135deg, #fff 40%, #818cf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 40px 24px 160px; position: relative; z-index: 1; }
+
+  /* Back + Title */
+  .top-bar { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
+  .back-btn { width: 48px; height: 48px; border-radius: 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 20px; cursor: pointer; text-decoration: none; }
+  .top-bar h2 { font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: #64748b; }
+
+  /* Search summary */
+  .search-summary { margin-bottom: 32px; }
+  .search-summary h1 { font-size: clamp(28px, 5vw, 48px); font-weight: 900; font-style: italic; line-height: 1; letter-spacing: -0.04em; margin-bottom: 8px; }
+  .search-summary p { font-size: 13px; color: #64748b; font-weight: 500; }
+  .search-summary .count { color: #818cf8; font-weight: 900; }
+
+  /* View Toggle */
+  .view-toggle { display: flex; gap: 8px; margin-bottom: 32px; }
+  .toggle-btn { padding: 10px 24px; border-radius: 20px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.12em; border: 1px solid rgba(255,255,255,0.08); background: transparent; color: #64748b; cursor: pointer; transition: all 0.3s; }
+  .toggle-btn.active { background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.3); color: #818cf8; }
+
+  /* Filter chips */
+  .filters { display: flex; gap: 8px; margin-bottom: 32px; flex-wrap: wrap; }
+  .chip { padding: 8px 20px; border-radius: 20px; font-size: 11px; font-weight: 700; border: 1px solid rgba(255,255,255,0.08); background: transparent; color: #94a3b8; cursor: pointer; transition: all 0.3s; }
+  .chip.active { background: rgba(99,102,241,0.12); border-color: rgba(99,102,241,0.3); color: #818cf8; }
+
+  /* Hotel cards grid */
+  .hotels-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+  .hotel-card { border-radius: 32px; overflow: hidden; cursor: pointer; transition: border-color 0.3s, transform 0.2s; }
+  .hotel-card:hover { border-color: rgba(99,102,241,0.3); transform: translateY(-2px); }
+
+  .hotel-img { width: 100%; height: 180px; background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); position: relative; }
+  .hotel-img .verified { position: absolute; top: 12px; right: 12px; background: rgba(16,185,129,0.2); border: 1px solid rgba(16,185,129,0.3); color: #10b981; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 10px; border-radius: 10px; }
+  .hotel-img .ai-badge { position: absolute; bottom: 12px; left: 12px; width: 48px; height: 48px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; }
+  .ai-badge.green { background: rgba(16,185,129,0.2); border: 1px solid rgba(16,185,129,0.3); color: #10b981; }
+  .ai-badge.amber { background: rgba(245,158,11,0.2); border: 1px solid rgba(245,158,11,0.3); color: #f59e0b; }
+  .ai-badge.red { background: rgba(244,63,94,0.2); border: 1px solid rgba(244,63,94,0.3); color: #f43f5e; }
+
+  .hotel-info { padding: 20px; }
+  .hotel-name { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
+  .hotel-location { font-size: 12px; color: #64748b; font-weight: 500; margin-bottom: 12px; }
+
+  .hotel-ratings { display: flex; gap: 16px; align-items: center; }
+  .rating-item { display: flex; align-items: center; gap: 4px; }
+  .rating-item .icon { font-size: 14px; }
+  .rating-item .val { font-size: 13px; font-weight: 800; }
+  .rating-item .label { font-size: 10px; color: #64748b; font-weight: 600; }
+  .google-rating { color: #facc15; }
+  .ai-rating { color: #818cf8; }
+  .review-count { font-size: 11px; color: #475569; font-weight: 600; }
+
+  /* Map placeholder */
+  .map-placeholder { width: 100%; height: 400px; border-radius: 32px; background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); border: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; display: none; }
+  .map-placeholder.visible { display: flex; }
+  .map-placeholder .icon { font-size: 48px; color: #475569; }
+  .map-placeholder p { font-size: 12px; color: #475569; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+
+  /* Bottom Nav */
+  .bottom-nav { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); min-width: 500px; height: 80px; background: rgba(2,6,23,0.9); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.1); border-radius: 40px; display: flex; justify-content: space-around; align-items: center; padding: 0 32px; z-index: 200; box-shadow: 0 25px 50px rgba(0,0,0,0.8); }
+  .nav-item { color: #475569; padding: 12px; cursor: pointer; font-size: 22px; transition: color 0.3s; }
+  .nav-item.active { color: #6366f1; }
+  .nav-center { width: 64px; height: 64px; border-radius: 24px; background: linear-gradient(135deg, #4f46e5, #7c3aed); display: flex; align-items: center; justify-content: center; color: white; font-size: 28px; margin-top: -48px; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 10px 40px rgba(99,102,241,0.4); cursor: pointer; }
+
+  @media (max-width: 768px) {
+    .hotels-grid { grid-template-columns: 1fr; }
+    .bottom-nav { min-width: auto; width: 92%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="glow-1"></div>
+<div class="glow-2"></div>
+
+<div class="container">
+  <!-- Top bar -->
+  <div class="top-bar">
+    <a href="02-dashboard.html" class="back-btn">←</a>
+    <h2>Rezultati pretrage</h2>
+  </div>
+
+  <!-- Search summary -->
+  <div class="search-summary">
+    <h1 class="text-gradient">Hanioti, Halkidiki</h1>
+    <p>Pronađeno <span class="count">6</span> hotela &bull; AI analiza dostupna za sve</p>
+  </div>
+
+  <!-- View toggle: Lista / Mapa -->
+  <div class="view-toggle">
+    <button class="toggle-btn active" onclick="showList()">Lista</button>
+    <button class="toggle-btn" onclick="showMap()">Mapa</button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <span class="chip active">Svi</span>
+    <span class="chip">AI 8+</span>
+    <span class="chip">Google 4.5+</span>
+    <span class="chip">Verifikovani</span>
+  </div>
+
+  <!-- Hotel cards -->
+  <div class="hotels-grid" id="hotelList">
+    <!-- Hotel 1 — High score -->
+    <div class="glass-card hotel-card">
+      <div class="hotel-img">
+        <span class="verified">&#x2713; Verifikovano</span>
+        <div class="ai-badge green">8.5</div>
+      </div>
+      <div class="hotel-info">
+        <div class="hotel-name">Alexander The Great Hotel</div>
+        <div class="hotel-location">Hanioti, Kasandra</div>
+        <div class="hotel-ratings">
+          <div class="rating-item">
+            <span class="icon">&#9733;</span>
+            <span class="val google-rating">4.6</span>
+            <span class="label">Google</span>
+          </div>
+          <div class="rating-item">
+            <span class="icon">&#x1F916;</span>
+            <span class="val ai-rating">8.5</span>
+            <span class="label">AI</span>
+          </div>
+          <span class="review-count">2,450 recenzija</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hotel 2 — Medium score -->
+    <div class="glass-card hotel-card">
+      <div class="hotel-img">
+        <span class="verified">&#x2713; Verifikovano</span>
+        <div class="ai-badge green">8.1</div>
+      </div>
+      <div class="hotel-info">
+        <div class="hotel-name">Hotel Hanioti Palace</div>
+        <div class="hotel-location">Hanioti, Kasandra</div>
+        <div class="hotel-ratings">
+          <div class="rating-item">
+            <span class="icon">&#9733;</span>
+            <span class="val google-rating">4.4</span>
+            <span class="label">Google</span>
+          </div>
+          <div class="rating-item">
+            <span class="icon">&#x1F916;</span>
+            <span class="val ai-rating">8.1</span>
+            <span class="label">AI</span>
+          </div>
+          <span class="review-count">1,890 recenzija</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hotel 3 — Amber score -->
+    <div class="glass-card hotel-card">
+      <div class="hotel-img">
+        <span class="verified">&#x2713; Verifikovano</span>
+        <div class="ai-badge amber">6.8</div>
+      </div>
+      <div class="hotel-info">
+        <div class="hotel-name">Sousouras Hotel</div>
+        <div class="hotel-location">Hanioti, Kasandra</div>
+        <div class="hotel-ratings">
+          <div class="rating-item">
+            <span class="icon">&#9733;</span>
+            <span class="val google-rating">4.1</span>
+            <span class="label">Google</span>
+          </div>
+          <div class="rating-item">
+            <span class="icon">&#x1F916;</span>
+            <span class="val ai-rating">6.8</span>
+            <span class="label">AI</span>
+          </div>
+          <span class="review-count">1,340 recenzija</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hotel 4 — Low score -->
+    <div class="glass-card hotel-card">
+      <div class="hotel-img">
+        <div class="ai-badge red">4.2</div>
+      </div>
+      <div class="hotel-info">
+        <div class="hotel-name">Hotel Mallas</div>
+        <div class="hotel-location">Hanioti, Kasandra</div>
+        <div class="hotel-ratings">
+          <div class="rating-item">
+            <span class="icon">&#9733;</span>
+            <span class="val google-rating">3.5</span>
+            <span class="label">Google</span>
+          </div>
+          <div class="rating-item">
+            <span class="icon">&#x1F916;</span>
+            <span class="val ai-rating">4.2</span>
+            <span class="label">AI</span>
+          </div>
+          <span class="review-count">780 recenzija</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hotel 5 -->
+    <div class="glass-card hotel-card">
+      <div class="hotel-img">
+        <span class="verified">&#x2713; Verifikovano</span>
+        <div class="ai-badge green">8.9</div>
+      </div>
+      <div class="hotel-info">
+        <div class="hotel-name">Xenios Anastasia Resort</div>
+        <div class="hotel-location">Hanioti, Kasandra</div>
+        <div class="hotel-ratings">
+          <div class="rating-item">
+            <span class="icon">&#9733;</span>
+            <span class="val google-rating">4.7</span>
+            <span class="label">Google</span>
+          </div>
+          <div class="rating-item">
+            <span class="icon">&#x1F916;</span>
+            <span class="val ai-rating">8.9</span>
+            <span class="label">AI</span>
+          </div>
+          <span class="review-count">3,100 recenzija</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hotel 6 -->
+    <div class="glass-card hotel-card">
+      <div class="hotel-img">
+        <span class="verified">&#x2713; Verifikovano</span>
+        <div class="ai-badge amber">7.4</div>
+      </div>
+      <div class="hotel-info">
+        <div class="hotel-name">Lesse Hotel</div>
+        <div class="hotel-location">Hanioti, Kasandra</div>
+        <div class="hotel-ratings">
+          <div class="rating-item">
+            <span class="icon">&#9733;</span>
+            <span class="val google-rating">4.3</span>
+            <span class="label">Google</span>
+          </div>
+          <div class="rating-item">
+            <span class="icon">&#x1F916;</span>
+            <span class="val ai-rating">7.4</span>
+            <span class="label">AI</span>
+          </div>
+          <span class="review-count">2,010 recenzija</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Map placeholder (hidden by default) -->
+  <div class="map-placeholder glass-card" id="mapView">
+    <div class="icon">&#x1F5FA;</div>
+    <p>MapLibre interaktivna mapa</p>
+    <p style="color:#64748b; font-size:11px; text-transform:none; letter-spacing:0;">Pin-ovi u boji po AI score-u (zeleno/narandžasto/crveno)</p>
+  </div>
+</div>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+  <span class="nav-item">&#x1F3E0;</span>
+  <span class="nav-item">&#x1F30D;</span>
+  <div class="nav-center">&#x26A1;</div>
+  <span class="nav-item">&#x1F554;</span>
+  <span class="nav-item">&#x1F464;</span>
+</div>
+
+<script>
+function showList() {
+  document.getElementById('hotelList').style.display = 'grid';
+  document.getElementById('mapView').classList.remove('visible');
+  document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.toggle-btn')[0].classList.add('active');
+}
+function showMap() {
+  document.getElementById('hotelList').style.display = 'none';
+  document.getElementById('mapView').classList.add('visible');
+  document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.toggle-btn')[1].classList.add('active');
+}
+</script>
+
+</body>
+</html>

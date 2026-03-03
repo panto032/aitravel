@@ -1,11 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import { SessionProvider } from "next-auth/react";
+import { ThemeProvider } from "@/lib/theme";
+import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "TravelAI - Pronađi istinu u recenzijama",
+  title: "TravelAI - Putuj bez maski",
   description:
-    "AI analizira hiljade recenzija i pronalazi najbolji smestaj za tebe. Otkrij šta se krije iza marketinga.",
+    "Prva platforma koja analizira hiljade recenzija pomoću AI agenata kako bi ti pokazala šta se stvarno dešava u hotelu.",
   manifest: "/manifest.json",
   icons: {
     icon: "/icons/icon-192.png",
@@ -26,9 +28,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="sr">
+    <html lang="sr" className="dark">
       <body className="antialiased">
-        <SessionProvider>{children}</SessionProvider>
+        <SessionProvider>
+          <ThemeProvider>{children}</ThemeProvider>
+          <ServiceWorkerRegister />
+        </SessionProvider>
       </body>
     </html>
   );

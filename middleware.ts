@@ -6,12 +6,14 @@ export default auth((req) => {
   const { pathname } = req.nextUrl;
 
   // Public routes
-  const publicRoutes = ["/", "/login", "/register"];
+  const publicRoutes = ["/", "/login", "/register", "/uslovi", "/privatnost", "/o-nama"];
   const isPublicRoute = publicRoutes.includes(pathname);
   const isAuthApi = pathname.startsWith("/api/auth");
+  const isPublicApi = pathname.startsWith("/api/public");
+  const isPhotoApi = pathname.startsWith("/api/photos");
 
-  // Allow public routes and auth API
-  if (isPublicRoute || isAuthApi) {
+  // Allow public routes, auth API, public API, and photo proxy
+  if (isPublicRoute || isAuthApi || isPublicApi || isPhotoApi) {
     if (isLoggedIn && (pathname === "/login" || pathname === "/register")) {
       return NextResponse.redirect(new URL("/dashboard", req.nextUrl));
     }
@@ -20,6 +22,9 @@ export default auth((req) => {
 
   // Protect all other routes
   if (!isLoggedIn) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     return NextResponse.redirect(new URL("/login", req.nextUrl));
   }
 

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TravelAI — Uporedi hotele</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #020205; color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; overflow-x: hidden; min-height: 100vh; }
+  .glow-1 { position: fixed; top: -10%; left: -10%; width: 60%; height: 60%; background: rgba(99,102,241,0.05); filter: blur(120px); border-radius: 50%; pointer-events: none; }
+  .glow-2 { position: fixed; bottom: -10%; right: -10%; width: 50%; height: 50%; background: rgba(168,85,247,0.05); filter: blur(120px); border-radius: 50%; pointer-events: none; }
+  .glass-card { background: rgba(255,255,255,0.02); backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.05); }
+  .text-gradient { background: linear-gradient(135deg, #fff 40%, #818cf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 40px 24px 160px; position: relative; z-index: 1; }
+
+  /* Back */
+  .top-bar { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
+  .back-btn { width: 48px; height: 48px; border-radius: 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 20px; cursor: pointer; text-decoration: none; }
+  .top-bar h2 { font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: #64748b; }
+
+  /* Heading */
+  h1 { font-size: clamp(28px, 5vw, 48px); font-weight: 900; font-style: italic; line-height: 1; letter-spacing: -0.04em; margin-bottom: 8px; }
+  .subtitle { font-size: 13px; color: #64748b; font-weight: 500; margin-bottom: 40px; }
+
+  /* Comparison table */
+  .compare-grid { display: grid; grid-template-columns: 160px 1fr 1fr; gap: 0; margin-bottom: 40px; }
+
+  .compare-header { display: contents; }
+  .compare-header > div { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .compare-label-cell { display: flex; align-items: flex-end; padding-bottom: 20px; }
+
+  .hotel-col { text-align: center; border-radius: 32px 32px 0 0; padding: 32px 20px 20px; }
+  .hotel-col.winner { border-color: rgba(16,185,129,0.2); }
+  .hotel-col-img { width: 80px; height: 80px; border-radius: 24px; background: linear-gradient(135deg, #1e1b4b, #312e81); margin: 0 auto 12px; }
+  .hotel-col-name { font-size: 15px; font-weight: 900; margin-bottom: 4px; }
+  .hotel-col-loc { font-size: 11px; color: #64748b; font-weight: 500; }
+  .winner-badge { display: inline-block; margin-top: 8px; padding: 4px 12px; border-radius: 10px; background: rgba(16,185,129,0.12); color: #10b981; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; }
+
+  /* Rows */
+  .compare-row { display: contents; }
+  .compare-row > div { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.03); display: flex; align-items: center; }
+  .row-label { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; }
+  .row-icon { margin-right: 8px; }
+  .row-value { text-align: center; justify-content: center; font-size: 20px; font-weight: 900; font-style: italic; }
+  .row-value.best { color: #10b981; }
+  .row-value.worse { color: #64748b; }
+  .row-value .small { font-size: 11px; font-weight: 600; font-style: normal; color: #475569; display: block; margin-top: 2px; }
+
+  /* Bar chart visual */
+  .bar-wrap { width: 100%; margin-top: 4px; }
+  .bar { height: 6px; border-radius: 3px; transition: width 0.6s ease; }
+  .bar.green { background: linear-gradient(90deg, #10b981, #34d399); }
+  .bar.amber { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+  .bar.red { background: linear-gradient(90deg, #f43f5e, #fb7185); }
+
+  /* Verdict */
+  .verdict { border-radius: 32px; padding: 32px; text-align: center; margin-bottom: 40px; border-color: rgba(16,185,129,0.2); background: rgba(16,185,129,0.02); }
+  .verdict-label { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; color: #10b981; margin-bottom: 12px; }
+  .verdict-text { font-size: 18px; font-weight: 800; font-style: italic; line-height: 1.5; }
+  .verdict-text .hl { color: #10b981; }
+
+  /* Empty state */
+  .empty-state { text-align: center; padding: 80px 24px; }
+  .empty-icon { font-size: 48px; color: #475569; margin-bottom: 16px; }
+  .empty-title { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+  .empty-desc { font-size: 13px; color: #64748b; max-width: 300px; margin: 0 auto 24px; }
+  .btn-add { padding: 14px 32px; border-radius: 20px; background: #4f46e5; color: white; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.12em; border: none; cursor: pointer; box-shadow: 0 8px 24px rgba(99,102,241,0.2); }
+
+  /* Bottom Nav */
+  .bottom-nav { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); min-width: 500px; height: 80px; background: rgba(2,6,23,0.9); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.1); border-radius: 40px; display: flex; justify-content: space-around; align-items: center; padding: 0 32px; z-index: 200; box-shadow: 0 25px 50px rgba(0,0,0,0.8); }
+  .nav-item { color: #475569; padding: 12px; cursor: pointer; font-size: 22px; }
+  .nav-item.active { color: #6366f1; }
+  .nav-center { width: 64px; height: 64px; border-radius: 24px; background: linear-gradient(135deg, #4f46e5, #7c3aed); display: flex; align-items: center; justify-content: center; color: white; font-size: 28px; margin-top: -48px; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 10px 40px rgba(99,102,241,0.4); cursor: pointer; }
+
+  @media (max-width: 768px) {
+    .compare-grid { grid-template-columns: 100px 1fr 1fr; }
+    .row-value { font-size: 16px; }
+    .bottom-nav { min-width: auto; width: 92%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="glow-1"></div>
+<div class="glow-2"></div>
+
+<div class="container">
+  <!-- Top bar -->
+  <div class="top-bar">
+    <a href="02-dashboard.html" class="back-btn">←</a>
+    <h2>Uporedi</h2>
+  </div>
+
+  <h1 class="text-gradient">Uporedi hotele</h1>
+  <p class="subtitle">Side-by-side poređenje na osnovu AI analize i pravih recenzija</p>
+
+  <!-- Comparison grid -->
+  <div class="compare-grid">
+    <!-- Header row -->
+    <div class="compare-header">
+      <div class="compare-label-cell"></div>
+      <div class="glass-card hotel-col winner">
+        <div class="hotel-col-img"></div>
+        <div class="hotel-col-name">Alexander The Great</div>
+        <div class="hotel-col-loc">Hanioti</div>
+        <span class="winner-badge">&#x1F3C6; Pobednik</span>
+      </div>
+      <div class="glass-card hotel-col">
+        <div class="hotel-col-img"></div>
+        <div class="hotel-col-name">Hotel Mallas</div>
+        <div class="hotel-col-loc">Hanioti</div>
+      </div>
+    </div>
+
+    <!-- AI Trust Rating -->
+    <div class="compare-row">
+      <div><span class="row-label">&#x1F916; AI Score</span></div>
+      <div class="row-value best">
+        8.5
+        <div class="bar-wrap"><div class="bar green" style="width: 85%;"></div></div>
+      </div>
+      <div class="row-value worse">
+        4.2
+        <div class="bar-wrap"><div class="bar red" style="width: 42%;"></div></div>
+      </div>
+    </div>
+
+    <!-- Google Rating -->
+    <div class="compare-row">
+      <div><span class="row-label">&#9733; Google</span></div>
+      <div class="row-value best">
+        4.6
+        <span class="small">2,450 rec.</span>
+      </div>
+      <div class="row-value worse">
+        3.5
+        <span class="small">780 rec.</span>
+      </div>
+    </div>
+
+    <!-- Lokacija -->
+    <div class="compare-row">
+      <div><span class="row-label">&#x1F4CD; Lokacija</span></div>
+      <div class="row-value best">
+        9.2
+        <div class="bar-wrap"><div class="bar green" style="width: 92%;"></div></div>
+      </div>
+      <div class="row-value worse">
+        6.0
+        <div class="bar-wrap"><div class="bar amber" style="width: 60%;"></div></div>
+      </div>
+    </div>
+
+    <!-- Čistoća -->
+    <div class="compare-row">
+      <div><span class="row-label">&#x1F9F9; Čistoća</span></div>
+      <div class="row-value best">
+        8.8
+        <div class="bar-wrap"><div class="bar green" style="width: 88%;"></div></div>
+      </div>
+      <div class="row-value worse">
+        3.8
+        <div class="bar-wrap"><div class="bar red" style="width: 38%;"></div></div>
+      </div>
+    </div>
+
+    <!-- Osoblje -->
+    <div class="compare-row">
+      <div><span class="row-label">&#x1F468; Osoblje</span></div>
+      <div class="row-value best">
+        9.0
+        <div class="bar-wrap"><div class="bar green" style="width: 90%;"></div></div>
+      </div>
+      <div class="row-value worse">
+        5.5
+        <div class="bar-wrap"><div class="bar amber" style="width: 55%;"></div></div>
+      </div>
+    </div>
+
+    <!-- Sobe -->
+    <div class="compare-row">
+      <div><span class="row-label">&#x1F6CF; Sobe</span></div>
+      <div class="row-value" style="color:#f59e0b;">
+        7.5
+        <div class="bar-wrap"><div class="bar amber" style="width: 75%;"></div></div>
+      </div>
+      <div class="row-value worse">
+        4.0
+        <div class="bar-wrap"><div class="bar red" style="width: 40%;"></div></div>
+      </div>
+    </div>
+
+    <!-- Doručak -->
+    <div class="compare-row">
+      <div><span class="row-label">&#x1F373; Doručak</span></div>
+      <div class="row-value" style="color:#f43f5e;">
+        5.4
+        <div class="bar-wrap"><div class="bar red" style="width: 54%;"></div></div>
+      </div>
+      <div class="row-value worse">
+        3.0
+        <div class="bar-wrap"><div class="bar red" style="width: 30%;"></div></div>
+      </div>
+    </div>
+
+    <!-- WiFi -->
+    <div class="compare-row">
+      <div><span class="row-label">&#x1F4F6; WiFi</span></div>
+      <div class="row-value" style="color:#f59e0b;">
+        6.2
+        <div class="bar-wrap"><div class="bar amber" style="width: 62%;"></div></div>
+      </div>
+      <div class="row-value worse">
+        2.5
+        <div class="bar-wrap"><div class="bar red" style="width: 25%;"></div></div>
+      </div>
+    </div>
+
+    <!-- Vrednost -->
+    <div class="compare-row">
+      <div><span class="row-label">&#x1F4B0; Vrednost</span></div>
+      <div class="row-value best">
+        8.0
+        <div class="bar-wrap"><div class="bar green" style="width: 80%;"></div></div>
+      </div>
+      <div class="row-value worse">
+        4.5
+        <div class="bar-wrap"><div class="bar red" style="width: 45%;"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Verdict -->
+  <div class="glass-card verdict">
+    <div class="verdict-label">AI Verdikt</div>
+    <div class="verdict-text">
+      <span class="hl">Alexander The Great</span> je bolji izbor u <span class="hl">8 od 8</span> kategorija.<br>
+      Jedina slabost je doručak — ali u blizini je Taverna Kostas (4.8&#9733;) na samo 350m.
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+  <span class="nav-item">&#x1F3E0;</span>
+  <span class="nav-item active">&#x1F30D;</span>
+  <div class="nav-center">&#x26A1;</div>
+  <span class="nav-item">&#x1F554;</span>
+  <span class="nav-item">&#x1F464;</span>
+</div>
+
+</body>
+</html>
