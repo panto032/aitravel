@@ -66,11 +66,11 @@ export default function ONamaPage() {
             </tr>
             <tr className="border-b border-[var(--border)]">
               <td className="py-3 font-bold text-[var(--text-secondary)]">PIB</td>
-              <td className="py-3">[PIB — DOPUNITI]</td>
+              <td className="py-3">111029989</td>
             </tr>
             <tr className="border-b border-[var(--border)]">
               <td className="py-3 font-bold text-[var(--text-secondary)]">Matični broj</td>
-              <td className="py-3">[MATIČNI BROJ — DOPUNITI]</td>
+              <td className="py-3">21416061</td>
             </tr>
             <tr className="border-b border-[var(--border)]">
               <td className="py-3 font-bold text-[var(--text-secondary)]">Godina osnivanja</td>
