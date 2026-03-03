@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { WifiOff } from "lucide-react";
+import { useTheme } from "@/lib/theme";
 
 export default function MainLayout({
   children,
@@ -10,6 +11,8 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   const [offline, setOffline] = useState(false);
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   useEffect(() => {
     const handleOnline = () => setOffline(false);
@@ -25,16 +28,10 @@ export default function MainLayout({
   }, []);
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] relative overflow-x-hidden">
-      {/* Background glows */}
-      <div
-        className="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-500 blur-[120px] pointer-events-none rounded-full"
-        style={{ opacity: "var(--glow-opacity)" }}
-      />
-      <div
-        className="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-500 blur-[120px] pointer-events-none rounded-full"
-        style={{ opacity: "var(--glow-opacity)" }}
-      />
+    <div className={`min-h-screen transition-colors duration-500 font-sans selection:bg-indigo-500/30 overflow-x-hidden ${isDark ? 'bg-[#020205] text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
+      {/* Ambient background glow — matches original design */}
+      <div className={`fixed top-[-10%] left-[-10%] w-[60%] h-[60%] blur-[120px] pointer-events-none rounded-full ${isDark ? 'bg-indigo-500/5' : 'bg-indigo-500/10'}`} />
+      <div className={`fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] blur-[120px] pointer-events-none rounded-full ${isDark ? 'bg-purple-500/5' : 'bg-purple-500/10'}`} />
 
       {/* Offline banner */}
       {offline && (

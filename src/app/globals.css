@@ -6,36 +6,36 @@
   --color-accent: #10b981;
   --color-accent-light: #34d399;
   --color-surface: #020205;
-  --color-surface-light: rgba(255, 255, 255, 0.03);
+  --color-surface-light: rgba(255, 255, 255, 0.02);
   --color-surface-lighter: rgba(255, 255, 255, 0.05);
   --color-danger: #f43f5e;
   --color-warning: #f59e0b;
 }
 
-/* Theme variables — dark is default */
+/* Theme variables — dark is absolute default */
 :root,
 .dark {
   --bg-primary: #020205;
-  --bg-card: rgba(255, 255, 255, 0.03);
+  --bg-card: rgba(255, 255, 255, 0.02);
   --text-primary: #f1f5f9;
   --text-secondary: #94a3b8;
-  --border: rgba(255, 255, 255, 0.08);
-  --glass-bg: rgba(255, 255, 255, 0.03);
+  --border: rgba(255, 255, 255, 0.05);
+  --glass-bg: rgba(255, 255, 255, 0.02);
   --glass-border: rgba(255, 255, 255, 0.05);
-  --glass-blur: 20px;
-  --glow-opacity: 0.1;
+  --glass-blur: 24px;
+  --glow-opacity: 0.05;
 }
 
 .light {
-  --bg-primary: #ffffff;
+  --bg-primary: #f8fafc;
   --bg-card: rgba(0, 0, 0, 0.03);
-  --text-primary: #1a1a2e;
+  --text-primary: #0f172a;
   --text-secondary: #64748b;
-  --border: rgba(0, 0, 0, 0.08);
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(0, 0, 0, 0.06);
-  --glass-blur: 20px;
-  --glow-opacity: 0.05;
+  --border: rgba(0, 0, 0, 0.05);
+  --glass-bg: rgba(0, 0, 0, 0.03);
+  --glass-border: rgba(0, 0, 0, 0.05);
+  --glass-blur: 24px;
+  --glow-opacity: 0.1;
 }
 
 body {
@@ -44,24 +44,32 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* Glass card */
+/* Glass card — matches original design exactly */
 .glass-card {
   background: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
 }
 
-/* Text gradient */
+/* Light theme glass gets subtle shadow */
+.light .glass-card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* Text gradient — matches original */
 .text-gradient {
-  background: linear-gradient(135deg, var(--text-primary) 30%, #a5b4fc 100%);
+  background: linear-gradient(135deg, #fff 40%, #818cf8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .light .text-gradient {
-  background: linear-gradient(135deg, #1a1a2e 30%, #6366f1 100%);
+  background: linear-gradient(135deg, #1e1b4b 40%, #4f46e5 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* Scrollbar hiding */
@@ -74,6 +82,12 @@ body {
 }
 
 /* Scanning animation */
+@keyframes scan-line {
+  0% { top: 0%; }
+  50% { top: 100%; }
+  100% { top: 0%; }
+}
+
 @keyframes scan-up-down {
   0%, 100% { transform: translateY(0); opacity: 0.2; }
   50% { transform: translateY(220px); opacity: 1; }
@@ -90,6 +104,15 @@ body {
 
 .scanning-line {
   animation: scan-up-down 2s ease-in-out infinite;
+}
+
+.scanning-active-line {
+  position: absolute;
+  height: 2px;
+  width: 100%;
+  background: #6366f1;
+  box-shadow: 0 0 15px #6366f1;
+  animation: scan-line 3s linear infinite;
 }
 
 /* Focus styles */
@@ -115,19 +138,6 @@ textarea:focus {
 
 .animate-fade-in {
   animation: fade-in 0.5s ease-out forwards;
-}
-
-/* Light theme adjustments */
-.light body,
-.light {
-  background: var(--bg-primary);
-  color: var(--text-primary);
-}
-
-.light .glass-card {
-  background: var(--glass-bg);
-  border-color: var(--glass-border);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 /* Legal pages prose */
