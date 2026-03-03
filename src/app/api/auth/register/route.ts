@@ -33,11 +33,16 @@ export async function POST(request: Request) {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    // First user automatically becomes ADMIN
+    const userCount = await prisma.user.count();
+    const role = userCount === 0 ? "ADMIN" : "USER";
+
     const user = await prisma.user.create({
       data: {
         name,
         email,
         hashedPassword,
+        role,
       },
     });
 

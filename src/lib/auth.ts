@@ -82,6 +82,28 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.role = user.role || "USER";
         token.plan = user.plan || "FREE";
       }
+
+      // Auto-promote first user to ADMIN if no admin exists
+      if (token.id && token.role !== "ADMIN") {
+        const adminExists = await prisma.user.findFirst({
+          where: { role: "ADMIN" },
+          select: { id: true },
+        });
+        if (!adminExists) {
+          const firstUser = await prisma.user.findFirst({
+            orderBy: { createdAt: "asc" },
+            select: { id: true },
+          });
+          if (firstUser && firstUser.id === token.id) {
+            await prisma.user.update({
+              where: { id: token.id as string },
+              data: { role: "ADMIN" },
+            });
+            token.role = "ADMIN";
+          }
+        }
+      }
+
       if (trigger === "update" && token.id) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
