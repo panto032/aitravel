@@ -296,11 +296,22 @@ Odgovaraj na srpskom jeziku.`,
     suggestedHotels: SearchResult[];
   };
   try {
-    haikuResult = JSON.parse(haikuText);
+    // Strip markdown code fences if present
+    const cleaned = haikuText.replace(/```(?:json)?\s*/g, "").replace(/```\s*/g, "").trim();
+    haikuResult = JSON.parse(cleaned);
   } catch {
+    // Try to extract JSON object from text
     const jsonMatch = haikuText.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
-      haikuResult = JSON.parse(jsonMatch[0]);
+      try {
+        haikuResult = JSON.parse(jsonMatch[0]);
+      } catch {
+        // Last resort: try to fix common JSON issues (trailing commas)
+        const fixedJson = jsonMatch[0]
+          .replace(/,\s*}/g, "}")
+          .replace(/,\s*\]/g, "]");
+        haikuResult = JSON.parse(fixedJson);
+      }
     } else {
       throw new Error("AI nije vratio validan odgovor");
     }
@@ -662,11 +673,19 @@ export async function analyzeHotel(
 
   let result: HotelAnalysis;
   try {
-    result = JSON.parse(sonnetText);
+    const cleaned = sonnetText.replace(/```(?:json)?\s*/g, "").replace(/```\s*/g, "").trim();
+    result = JSON.parse(cleaned);
   } catch {
     const jsonMatch = sonnetText.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
-      result = JSON.parse(jsonMatch[0]);
+      try {
+        result = JSON.parse(jsonMatch[0]);
+      } catch {
+        const fixedJson = jsonMatch[0]
+          .replace(/,\s*}/g, "}")
+          .replace(/,\s*\]/g, "]");
+        result = JSON.parse(fixedJson);
+      }
     } else {
       throw new Error("AI nije vratio validan odgovor");
     }

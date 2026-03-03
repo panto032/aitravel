@@ -31,9 +31,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const stored = localStorage.getItem("theme") as Theme | null;
     if (stored === "light" || stored === "dark") {
       setThemeState(stored);
-    } else if (window.matchMedia("(prefers-color-scheme: light)").matches) {
-      setThemeState("light");
     }
+    // Default is always dark — no system preference detection
   }, []);
 
   useEffect(() => {
