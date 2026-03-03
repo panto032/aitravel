@@ -125,7 +125,7 @@ model HotelCache {
   updatedAt         DateTime @updatedAt
 
   // Google Places fields
-  googlePlaceId     String?  @unique
+  googlePlaceId     String?
   latitude          Float?
   longitude         Float?
   googleRating      Float?
