@@ -1,12 +1,13 @@
 {
-  "name": "TravelAI - Pametni turisticki asistent",
+  "name": "TravelAI - Putuj bez maski",
   "short_name": "TravelAI",
-  "description": "AI analizira hiljade recenzija i pronalazi najbolji smestaj za tebe",
+  "description": "Prva platforma koja analizira hiljade recenzija pomocu AI agenata kako bi ti pokazala sta se stvarno desava u hotelu.",
   "start_url": "/dashboard",
   "display": "standalone",
-  "background_color": "#0a0a0a",
-  "theme_color": "#0a0a0a",
+  "background_color": "#020205",
+  "theme_color": "#020205",
   "orientation": "portrait",
+  "categories": ["travel", "lifestyle"],
   "icons": [
     {
       "src": "/icons/icon-192.png",

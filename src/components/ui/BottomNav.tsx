@@ -2,17 +2,19 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Search, BarChart3, Star, ShieldCheck, Fingerprint } from "lucide-react";
+import { Search, BarChart3, Star, User, Fingerprint, Sun, Moon } from "lucide-react";
+import { useTheme } from "@/lib/theme";
 
 export function BottomNav() {
   const pathname = usePathname();
   const router = useRouter();
+  const { theme, toggleTheme } = useTheme();
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(href + "/");
 
   return (
-    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] md:w-auto md:min-w-[450px] h-16 md:h-20 bg-slate-950/80 backdrop-blur-2xl border border-white/10 rounded-[28px] md:rounded-[35px] flex justify-around items-center px-6 z-[200] shadow-2xl shadow-black ring-1 ring-white/5">
+    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] md:w-auto md:min-w-[500px] h-16 md:h-20 bg-slate-950/80 backdrop-blur-2xl border border-white/10 rounded-[28px] md:rounded-[35px] flex justify-around items-center px-4 md:px-6 z-[200] shadow-2xl shadow-black ring-1 ring-white/5">
       <NavItem
         icon={<Search size={22} />}
         active={isActive("/dashboard") || isActive("/search")}
@@ -37,10 +39,20 @@ export function BottomNav() {
         active={isActive("/saved")}
         href="/saved"
       />
+
+      {/* Theme toggle + Profile */}
+      <button
+        onClick={toggleTheme}
+        className="p-3 rounded-2xl transition-all duration-300 text-slate-600 hover:text-amber-400 hover:bg-white/5"
+        title={theme === "dark" ? "Svetla tema" : "Tamna tema"}
+      >
+        {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+      </button>
+
       <NavItem
-        icon={<ShieldCheck size={22} />}
-        active={false}
-        href="/dashboard"
+        icon={<User size={22} />}
+        active={isActive("/profile")}
+        href="/profile"
       />
     </nav>
   );

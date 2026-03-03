@@ -10,7 +10,6 @@ export async function GET() {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
-    // Parallel queries for speed
     const [
       totalUsers,
       newUsersThisMonth,
@@ -25,6 +24,9 @@ export async function GET() {
       totalRequests,
       recentSearches,
       topDestinations,
+      costByModel,
+      totalFeedback,
+      correctFeedback,
     ] = await Promise.all([
       prisma.user.count(),
       prisma.user.count({ where: { createdAt: { gte: startOfMonth } } }),
@@ -60,10 +62,55 @@ export async function GET() {
         orderBy: { _count: { query: "desc" } },
         take: 10,
       }),
+      // Cost breakdown by model
+      prisma.apiUsage.groupBy({
+        by: ["model"],
+        where: { createdAt: { gte: startOfMonth } },
+        _sum: { costUsd: true },
+        _count: true,
+      }),
+      // Feedback stats
+      prisma.aiFeedback.count(),
+      prisma.aiFeedback.count({ where: { isCorrect: true } }),
     ]);
 
     const cacheHitRate =
-      totalRequests > 0 ? ((cachedRequests / totalRequests) * 100).toFixed(1) : "0";
+      totalRequests > 0
+        ? ((cachedRequests / totalRequests) * 100).toFixed(1)
+        : "0";
+
+    // Build cost breakdown
+    const breakdown = costByModel.map((item) => ({
+      model: item.model,
+      cost: item._sum.costUsd || 0,
+      count: item._count,
+    }));
+
+    // Build feedback data
+    let feedbackData = undefined;
+    if (totalFeedback > 0) {
+      // Get hotels with most "incorrect" votes
+      const incorrectFeedback = await prisma.aiFeedback.groupBy({
+        by: ["hotelCacheId", "category"],
+        where: { isCorrect: false },
+        _count: true,
+        orderBy: { _count: { hotelCacheId: "desc" } },
+        take: 5,
+      });
+
+      feedbackData = {
+        totalFeedback,
+        correctPercent:
+          totalFeedback > 0
+            ? Math.round((correctFeedback / totalFeedback) * 100)
+            : 0,
+        recentIncorrect: incorrectFeedback.map((f) => ({
+          hotelName: f.hotelCacheId, // This would ideally be resolved to hotel name
+          category: f.category,
+          count: f._count,
+        })),
+      };
+    }
 
     return NextResponse.json({
       users: {
@@ -82,6 +129,7 @@ export async function GET() {
       costs: {
         thisMonth: apiCostThisMonth._sum.costUsd || 0,
         lastMonth: apiCostLastMonth._sum.costUsd || 0,
+        breakdown,
       },
       cache: {
         hitRate: cacheHitRate,
@@ -97,10 +145,17 @@ export async function GET() {
         query: d.query,
         count: d._count.query,
       })),
+      feedback: feedbackData,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Server error";
-    const status = message === "Forbidden" ? 403 : message === "Unauthorized" ? 401 : 500;
+    const message =
+      error instanceof Error ? error.message : "Server error";
+    const status =
+      message === "Forbidden"
+        ? 403
+        : message === "Unauthorized"
+          ? 401
+          : 500;
     return NextResponse.json({ error: message }, { status });
   }
 }

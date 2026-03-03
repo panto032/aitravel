@@ -39,6 +39,7 @@ model User {
   savedAnalyses  SavedAnalysis[]
   searchHistory  SearchHistory[]
   apiUsage       ApiUsage[]
+  aiFeedback     AiFeedback[]
 }
 
 model Account {
@@ -111,17 +112,28 @@ model SearchHistory {
 }
 
 model HotelCache {
-  id          String   @id @default(cuid())
-  externalId  String?
-  name        String
-  location    String
-  rawReviews  Json?
-  aiAnalysis  Json?
-  aiScore     Float?
-  sources     String[]
-  lastScraped DateTime @default(now())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                String   @id @default(cuid())
+  externalId        String?
+  name              String
+  location          String
+  rawReviews        Json?
+  aiAnalysis        Json?
+  aiScore           Float?
+  sources           String[]
+  lastScraped       DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Google Places fields
+  googlePlaceId     String?  @unique
+  latitude          Float?
+  longitude         Float?
+  googleRating      Float?
+  googleReviewCount Int?
+  googlePhotos      Json?
+  googleReviews     Json?
+  nearbyPlaces      Json?
+  geminiAnalysis    Json?
 
   @@unique([name, location])
   @@index([location])
@@ -148,6 +160,26 @@ model ApiUsage {
   @@index([userId])
   @@index([createdAt])
   @@index([type])
+  @@index([model])
+}
+
+// ============================================
+// AI FEEDBACK (user verification loop)
+// ============================================
+
+model AiFeedback {
+  id           String   @id @default(cuid())
+  userId       String
+  hotelCacheId String
+  category     String   // "overall" | "lokacija" | "cistoca" | etc.
+  isCorrect    Boolean  // true = "AI je u pravu", false = "AI je pogresio"
+  comment      String?
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, hotelCacheId, category])
+  @@index([hotelCacheId])
 }
 
 // Search cache za destinacije (ne samo hotele)

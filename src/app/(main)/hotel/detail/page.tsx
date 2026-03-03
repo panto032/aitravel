@@ -1,27 +1,41 @@
 "use client";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
+import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   ChevronLeft, MapPin, Star, ShieldCheck, Zap, ArrowUpDown, ArrowRight,
   Sparkles, ShieldAlert, Fingerprint, Waves, Wifi, Coffee, Bed,
-  Utensils, ThermometerSun, Heart,
+  Utensils, ThermometerSun, Heart, TrendingUp, TrendingDown, Minus,
+  ThumbsUp, ThumbsDown, Image as ImageIcon, Globe,
 } from "lucide-react";
 import type { HotelAnalysis } from "@/lib/ai";
+import { fetchAnalysis } from "@/lib/api-client";
+import maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
 
 const categoryIcons: Record<string, React.ReactNode> = {
-  Lokacija: <Waves className="text-emerald-400" size={24} />,
-  Cistoca: <Sparkles className="text-blue-400" size={24} />,
+  "Lokacija": <Waves className="text-emerald-400" size={24} />,
   "Čistoća": <Sparkles className="text-blue-400" size={24} />,
-  Osoblje: <ShieldCheck className="text-indigo-400" size={24} />,
+  "Cistoca": <Sparkles className="text-blue-400" size={24} />,
+  "Osoblje": <ShieldCheck className="text-indigo-400" size={24} />,
   "Kreveti i sobe": <Bed className="text-purple-400" size={24} />,
-  Dorucak: <Coffee className="text-amber-400" size={24} />,
   "Doručak": <Coffee className="text-amber-400" size={24} />,
-  WiFi: <Wifi className="text-rose-500" size={24} />,
+  "Dorucak": <Coffee className="text-amber-400" size={24} />,
+  "WiFi": <Wifi className="text-rose-500" size={24} />,
   "Vrednost za novac": <Zap className="text-emerald-400" size={24} />,
 };
 
-function ScanningLoader({ name }: { name: string }) {
+const trendIcons: Record<string, React.ReactNode> = {
+  improving: <TrendingUp size={14} className="text-emerald-400" />,
+  declining: <TrendingDown size={14} className="text-rose-400" />,
+  stable: <Minus size={14} className="text-slate-500" />,
+};
+
+interface FeedbackState {
+  [key: string]: boolean | undefined; // category → isCorrect
+}
+
+function ScanningLoader({ name, step }: { name: string; step: string }) {
   return (
     <div className="min-h-[70vh] flex flex-col items-center justify-center text-center">
       <div className="relative w-48 h-48 mb-12 animate-float">
@@ -40,8 +54,85 @@ function ScanningLoader({ name }: { name: string }) {
         Analiziram {name}
       </h2>
       <p className="text-sm text-indigo-400 font-black uppercase tracking-[0.3em] opacity-80">
-        Čitam recenzije sa više platformi...
+        {step}
       </p>
+    </div>
+  );
+}
+
+function PhotoGallery({ photos }: { photos: string[] }) {
+  if (!photos || photos.length === 0) return null;
+
+  return (
+    <div className="mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 rounded-[28px] overflow-hidden">
+        {photos.slice(0, 6).map((url, i) => (
+          <div
+            key={i}
+            className={`relative overflow-hidden bg-slate-900 ${
+              i === 0 ? "col-span-2 row-span-2 h-64 md:h-80" : "h-32 md:h-40"
+            }`}
+          >
+            <img
+              src={url}
+              alt={`Photo ${i + 1}`}
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+            />
+          </div>
+        ))}
+      </div>
+      {photos.length > 6 && (
+        <p className="text-[10px] text-slate-600 text-center mt-2 font-bold">
+          + {photos.length - 6} više slika
+        </p>
+      )}
+    </div>
+  );
+}
+
+function MiniMap({
+  lat,
+  lng,
+  hotelName,
+  nearby,
+}: {
+  lat: number;
+  lng: number;
+  hotelName: string;
+  nearby: HotelAnalysis["nearby"];
+}) {
+  const mapContainer = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<maplibregl.Map | null>(null);
+
+  useEffect(() => {
+    if (!mapContainer.current || mapRef.current) return;
+
+    const map = new maplibregl.Map({
+      container: mapContainer.current,
+      style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+      center: [lng, lat],
+      zoom: 14,
+    });
+
+    map.addControl(new maplibregl.NavigationControl(), "top-right");
+
+    // Hotel marker (larger, indigo)
+    const hotelEl = document.createElement("div");
+    hotelEl.style.cssText = "width:40px;height:40px;border-radius:50%;background:#6366f1;border:3px solid rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(99,102,241,0.5);";
+    hotelEl.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M3 22V11l9-7 9 7v11"/><path d="M9 22V12h6v10"/></svg>';
+
+    new maplibregl.Marker({ element: hotelEl })
+      .setLngLat([lng, lat])
+      .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(`<strong style="color:#1a1a2e">${hotelName}</strong>`))
+      .addTo(map);
+
+    mapRef.current = map;
+    return () => { map.remove(); mapRef.current = null; };
+  }, [lat, lng, hotelName, nearby]);
+
+  return (
+    <div className="glass-card rounded-[28px] overflow-hidden mb-12">
+      <div ref={mapContainer} className="h-[220px] w-full" />
     </div>
   );
 }
@@ -51,36 +142,47 @@ function HotelDetailContent() {
   const router = useRouter();
   const [analysis, setAnalysis] = useState<HotelAnalysis | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingStep, setLoadingStep] = useState("Čitam recenzije...");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [fromCache, setFromCache] = useState(false);
+  const [feedback, setFeedback] = useState<FeedbackState>({});
+  const [feedbackSending, setFeedbackSending] = useState<string | null>(null);
 
   const hotelName = searchParams.get("name") || "";
   const location = searchParams.get("location") || "";
+  const googlePlaceId = searchParams.get("placeId") || undefined;
 
   const loadAnalysis = useCallback(async () => {
     if (!hotelName || !location) return;
     setLoading(true);
     setError("");
 
-    try {
-      const res = await fetch("/api/ai/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ hotelName, location }),
-      });
+    // Multi-step loading messages
+    const steps = [
+      "Tražim na Google-u...",
+      "Čitam recenzije...",
+      "AI analiza u toku...",
+      "Pripremam izveštaj...",
+    ];
+    let stepIdx = 0;
+    const interval = setInterval(() => {
+      stepIdx = Math.min(stepIdx + 1, steps.length - 1);
+      setLoadingStep(steps[stepIdx]);
+    }, 2500);
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Greška");
-      }
-      setAnalysis(await res.json());
+    try {
+      const result = await fetchAnalysis(hotelName, location, googlePlaceId);
+      setAnalysis(result.data as HotelAnalysis);
+      setFromCache(result.fromCache);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Greška pri analizi");
     } finally {
+      clearInterval(interval);
       setLoading(false);
     }
-  }, [hotelName, location]);
+  }, [hotelName, location, googlePlaceId]);
 
   useEffect(() => {
     loadAnalysis();
@@ -101,18 +203,50 @@ function HotelDetailContent() {
         }),
       });
       if (res.ok) setSaved(true);
-    } catch { /* ignore */ }
-    finally { setSaving(false); }
+    } catch {
+      /* ignore */
+    } finally {
+      setSaving(false);
+    }
   };
 
-  if (loading) return <ScanningLoader name={hotelName} />;
+  const handleFeedback = async (category: string, isCorrect: boolean) => {
+    if (feedbackSending) return;
+    setFeedbackSending(category);
+    try {
+      // We need hotelCacheId — use a simple lookup
+      const res = await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          hotelCacheId: analysis?.googlePlaceId || `${hotelName}:${location}`,
+          category,
+          isCorrect,
+        }),
+      });
+      if (res.ok) {
+        setFeedback((prev) => ({ ...prev, [category]: isCorrect }));
+      }
+    } catch {
+      /* ignore */
+    } finally {
+      setFeedbackSending(null);
+    }
+  };
+
+  if (loading) return <ScanningLoader name={hotelName} step={loadingStep} />;
 
   if (error || !analysis) {
     return (
       <div className="text-center pt-32">
         <div className="glass-card border-rose-500/20 bg-rose-500/5 rounded-[35px] p-8 max-w-md mx-auto">
-          <p className="text-rose-400 font-semibold mb-4">{error || "Nema podataka"}</p>
-          <button onClick={loadAnalysis} className="text-indigo-400 text-sm font-black uppercase tracking-widest">
+          <p className="text-rose-400 font-semibold mb-4">
+            {error || "Nema podataka"}
+          </p>
+          <button
+            onClick={loadAnalysis}
+            className="text-indigo-400 text-sm font-black uppercase tracking-widest"
+          >
             Pokušaj ponovo
           </button>
         </div>
@@ -120,21 +254,29 @@ function HotelDetailContent() {
     );
   }
 
-  // Find worst category for critical warning
-  const worstCategory = [...analysis.scores].sort((a, b) => a.score - b.score)[0];
+  const worstCategory = [...analysis.scores].sort(
+    (a, b) => a.score - b.score
+  )[0];
 
   return (
     <div className="animate-fade-in-up">
       {/* Header */}
-      <div className="flex justify-between items-center mb-10">
-        <button onClick={() => router.back()} className="w-12 h-12 glass-card rounded-2xl flex items-center justify-center hover:bg-white/10">
+      <div className="flex justify-between items-center mb-8">
+        <button
+          onClick={() => router.back()}
+          className="w-12 h-12 glass-card rounded-2xl flex items-center justify-center hover:bg-white/10"
+        >
           <ChevronLeft size={24} />
         </button>
         <div className="flex items-center gap-3">
           <button
             onClick={handleSave}
             disabled={saved || saving}
-            className={`glass-card px-4 py-2 rounded-full flex items-center gap-2 transition-all ${saved ? "border-rose-500/30 text-rose-400" : "hover:bg-white/5 text-slate-400"}`}
+            className={`glass-card px-4 py-2 rounded-full flex items-center gap-2 transition-all ${
+              saved
+                ? "border-rose-500/30 text-rose-400"
+                : "hover:bg-white/5 text-slate-400"
+            }`}
           >
             <Heart size={16} fill={saved ? "currentColor" : "none"} />
             <span className="text-[10px] font-black uppercase tracking-widest">
@@ -144,11 +286,27 @@ function HotelDetailContent() {
           <div className="glass-card px-5 py-2 rounded-full border-indigo-500/30 flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-[10px] font-black tracking-widest uppercase text-indigo-300">
-              Detektivski Izveštaj
+              {analysis.dataQuality === "full"
+                ? "Verifikovan Izveštaj"
+                : analysis.dataQuality === "partial"
+                  ? "Delimično Verifikovan"
+                  : "AI Procena"}
             </span>
           </div>
+          {fromCache && (
+            <div className="glass-card px-4 py-2 rounded-full border-amber-500/30 bg-amber-500/10 flex items-center gap-2">
+              <span className="text-[10px] font-black tracking-widest uppercase text-amber-400">
+                Offline keš
+              </span>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Photo Gallery */}
+      {analysis.photos && analysis.photos.length > 0 && (
+        <PhotoGallery photos={analysis.photos} />
+      )}
 
       {/* Title + Score */}
       <section className="mb-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -179,20 +337,65 @@ function HotelDetailContent() {
                     <Star
                       key={i}
                       size={14}
-                      fill={i <= Math.round(analysis.aiScore / 2) ? "#6366f1" : "transparent"}
-                      className={i <= Math.round(analysis.aiScore / 2) ? "text-indigo-500" : "text-slate-800"}
+                      fill={
+                        i <= Math.round(analysis.aiScore / 2)
+                          ? "#6366f1"
+                          : "transparent"
+                      }
+                      className={
+                        i <= Math.round(analysis.aiScore / 2)
+                          ? "text-indigo-500"
+                          : "text-slate-800"
+                      }
                     />
                   ))}
+                </div>
+                {/* Feedback on overall */}
+                <div className="flex items-center gap-2 mt-3">
+                  <button
+                    onClick={() => handleFeedback("overall", true)}
+                    className={`p-1.5 rounded-lg transition-all ${
+                      feedback["overall"] === true
+                        ? "bg-emerald-500/20 text-emerald-400"
+                        : "hover:bg-white/5 text-slate-600"
+                    }`}
+                  >
+                    <ThumbsUp size={14} />
+                  </button>
+                  <button
+                    onClick={() => handleFeedback("overall", false)}
+                    className={`p-1.5 rounded-lg transition-all ${
+                      feedback["overall"] === false
+                        ? "bg-rose-500/20 text-rose-400"
+                        : "hover:bg-white/5 text-slate-600"
+                    }`}
+                  >
+                    <ThumbsDown size={14} />
+                  </button>
                 </div>
               </div>
               <div className="bg-slate-900/40 p-5 rounded-3xl border border-white/5 md:min-w-[180px]">
                 <span className="text-[10px] text-slate-500 font-black uppercase tracking-widest block mb-1">
                   Izvor podataka
                 </span>
-                <div className="text-lg font-bold text-white">{analysis.totalReviews} recenzija</div>
+                <div className="text-lg font-bold text-white">
+                  {analysis.totalReviews.toLocaleString("sr-RS")} recenzija
+                </div>
+                {analysis.googleRating && (
+                  <div className="flex items-center gap-1.5 mt-2">
+                    <Star size={12} className="text-amber-400" fill="currentColor" />
+                    <span className="text-white text-sm font-bold">
+                      {analysis.googleRating.toFixed(1)}
+                    </span>
+                    <span className="text-[10px] text-slate-600">Google</span>
+                  </div>
+                )}
                 <div className="flex flex-wrap gap-1 mt-2">
                   {analysis.reviewSources.map((src) => (
-                    <span key={src} className="text-[9px] text-slate-600 font-bold uppercase bg-white/5 px-2 py-0.5 rounded">
+                    <span
+                      key={src}
+                      className="text-[9px] text-slate-600 font-bold uppercase bg-white/5 px-2 py-0.5 rounded"
+                    >
                       {src}
                     </span>
                   ))}
@@ -215,23 +418,57 @@ function HotelDetailContent() {
               {analysis.bestFor[0]?.toUpperCase() || "SOLIDAN"}
             </span>
           </div>
-          <button
-            onClick={() => {}}
-            className="glass-card p-6 rounded-[35px] col-span-2 flex justify-between items-center group hover:bg-white/5 transition-all"
-          >
-            <div className="flex items-center gap-4 text-left">
-              <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-white">
-                <ArrowUpDown size={20} />
-              </div>
-              <div>
-                <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Uporedi Analizu</div>
-                <div className="text-sm font-bold text-white">Pronađi slične opcije</div>
-              </div>
-            </div>
-            <ArrowRight size={20} className="text-slate-600 group-hover:text-white transition-colors" />
-          </button>
+
+          {/* Data quality badge */}
+          <div className="glass-card p-4 rounded-[35px] col-span-2 flex items-center gap-4">
+            {analysis.verified ? (
+              <>
+                <ShieldCheck size={20} className="text-emerald-400 flex-shrink-0" />
+                <div>
+                  <div className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">
+                    Google Verifikovano
+                  </div>
+                  <div className="text-xs text-slate-500">
+                    {analysis.googleReviewCount?.toLocaleString("sr-RS")} pravih recenzija
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <ImageIcon size={20} className="text-amber-400 flex-shrink-0" />
+                <div>
+                  <div className="text-[10px] font-black text-amber-400 uppercase tracking-widest">
+                    AI Procena
+                  </div>
+                  <div className="text-xs text-slate-500">
+                    Bez Google verifikacije
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </section>
+
+      {/* Language breakdown */}
+      {analysis.languageBreakdown && analysis.languageBreakdown.length > 0 && (
+        <div className="glass-card p-5 rounded-[28px] mb-8 flex items-center gap-4 overflow-x-auto hide-scrollbar">
+          <Globe size={18} className="text-indigo-400 flex-shrink-0" />
+          <span className="text-[10px] text-slate-500 font-black uppercase tracking-widest flex-shrink-0">
+            Analizirano:
+          </span>
+          <div className="flex gap-3">
+            {analysis.languageBreakdown.map((lang) => (
+              <span
+                key={lang.language}
+                className="text-sm text-slate-300 font-medium whitespace-nowrap"
+              >
+                {lang.flag} {lang.count}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Bento Insights Grid */}
       <h2 className="text-xl font-black italic tracking-tighter mb-6 flex items-center gap-3">
@@ -240,22 +477,84 @@ function HotelDetailContent() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
         {analysis.scores.map((s) => (
-          <div key={s.category} className="glass-card p-6 rounded-[35px] hover:scale-[1.02] transition-transform">
-            <div className="mb-4">
-              {categoryIcons[s.category] || <ThermometerSun className="text-slate-400" size={24} />}
+          <div
+            key={s.category}
+            className="glass-card p-6 rounded-[35px] hover:scale-[1.02] transition-transform"
+          >
+            <div className="flex items-center justify-between mb-4">
+              {categoryIcons[s.category] || (
+                <ThermometerSun className="text-slate-400" size={24} />
+              )}
+              {s.trend && (
+                <div className="flex items-center gap-1">
+                  {trendIcons[s.trend]}
+                  <span className="text-[9px] text-slate-600 font-bold uppercase">
+                    {s.trend === "improving"
+                      ? "Raste"
+                      : s.trend === "declining"
+                        ? "Pada"
+                        : "Stabilno"}
+                  </span>
+                </div>
+              )}
             </div>
             <h4 className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1">
               {s.category}
             </h4>
-            <div className={`text-3xl font-black italic mb-3 ${
-              s.score >= 8 ? "text-emerald-400" : s.score >= 6 ? "text-white" : s.score >= 4 ? "text-amber-400" : "text-rose-500"
-            }`}>
+            <div
+              className={`text-3xl font-black italic mb-3 ${
+                s.score >= 8
+                  ? "text-emerald-400"
+                  : s.score >= 6
+                    ? "text-white"
+                    : s.score >= 4
+                      ? "text-amber-400"
+                      : "text-rose-500"
+              }`}
+            >
               {s.score.toFixed(1)}
             </div>
-            <p className="text-xs text-slate-400 leading-relaxed italic">&quot;{s.detail}&quot;</p>
-            <p className="text-[10px] text-slate-600 mt-2 font-bold">
-              Pomenuto u {s.mentionCount} recenzija
+            <p className="text-xs text-slate-400 leading-relaxed italic">
+              &quot;{s.detail}&quot;
             </p>
+
+            {/* Sample quote from real reviews */}
+            {s.sampleQuote && (
+              <div className="mt-3 p-3 bg-white/[0.02] rounded-xl border border-white/5">
+                <p className="text-[10px] text-slate-500 italic">
+                  &quot;{s.sampleQuote}&quot;
+                </p>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between mt-3">
+              <p className="text-[10px] text-slate-600 font-bold">
+                Pomenuto u {s.mentionCount} recenzija
+              </p>
+              {/* Per-category feedback */}
+              <div className="flex gap-1">
+                <button
+                  onClick={() => handleFeedback(s.category, true)}
+                  className={`p-1 rounded transition-all ${
+                    feedback[s.category] === true
+                      ? "bg-emerald-500/20 text-emerald-400"
+                      : "text-slate-700 hover:text-slate-400"
+                  }`}
+                >
+                  <ThumbsUp size={10} />
+                </button>
+                <button
+                  onClick={() => handleFeedback(s.category, false)}
+                  className={`p-1 rounded transition-all ${
+                    feedback[s.category] === false
+                      ? "bg-rose-500/20 text-rose-400"
+                      : "text-slate-700 hover:text-slate-400"
+                  }`}
+                >
+                  <ThumbsDown size={10} />
+                </button>
+              </div>
+            </div>
           </div>
         ))}
 
@@ -264,7 +563,9 @@ function HotelDetailContent() {
           <div className="flex items-start gap-4">
             <Sparkles className="text-indigo-400 flex-shrink-0" size={28} />
             <div>
-              <h4 className="text-xs font-black uppercase mb-2 text-indigo-400">Glavna AI Tajna</h4>
+              <h4 className="text-xs font-black uppercase mb-2 text-indigo-400">
+                Glavna AI Tajna
+              </h4>
               <p className="text-sm text-slate-300 leading-relaxed font-semibold italic">
                 {analysis.aiTip}
               </p>
@@ -276,7 +577,9 @@ function HotelDetailContent() {
       {/* Pros & Cons */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
         <div className="glass-card p-6 rounded-[35px] border-emerald-500/10 bg-emerald-500/[0.02]">
-          <h3 className="text-xs font-black uppercase tracking-widest text-emerald-400 mb-4">Prednosti</h3>
+          <h3 className="text-xs font-black uppercase tracking-widest text-emerald-400 mb-4">
+            Prednosti
+          </h3>
           {analysis.pros.map((pro, i) => (
             <div key={i} className="flex items-start gap-3 mb-3">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 flex-shrink-0" />
@@ -285,7 +588,9 @@ function HotelDetailContent() {
           ))}
         </div>
         <div className="glass-card p-6 rounded-[35px] border-rose-500/10 bg-rose-500/[0.02]">
-          <h3 className="text-xs font-black uppercase tracking-widest text-rose-400 mb-4">Mane</h3>
+          <h3 className="text-xs font-black uppercase tracking-widest text-rose-400 mb-4">
+            Mane
+          </h3>
           {analysis.cons.map((con, i) => (
             <div key={i} className="flex items-start gap-3 mb-3">
               <div className="w-1.5 h-1.5 rounded-full bg-rose-400 mt-2 flex-shrink-0" />
@@ -304,29 +609,67 @@ function HotelDetailContent() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
             {analysis.nearby.map((place, i) => {
               const typeIcon = {
-                restaurant: <Utensils size={20} className="text-rose-400" />,
+                restaurant: (
+                  <Utensils size={20} className="text-rose-400" />
+                ),
                 beach: <Waves size={20} className="text-blue-400" />,
                 bar: <Coffee size={20} className="text-purple-400" />,
                 attraction: <Star size={20} className="text-amber-400" />,
               };
               return (
-                <div key={i} className="glass-card p-5 rounded-[30px] flex items-center gap-4 hover:bg-white/5 transition-all">
-                  <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center flex-shrink-0">
-                    {typeIcon[place.type] || <MapPin size={20} className="text-slate-400" />}
-                  </div>
+                <div
+                  key={i}
+                  className="glass-card p-5 rounded-[30px] flex items-center gap-4 hover:bg-white/5 transition-all"
+                >
+                  {place.photoUrl ? (
+                    <div className="w-12 h-12 rounded-2xl overflow-hidden flex-shrink-0">
+                      <img
+                        src={place.photoUrl}
+                        alt={place.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center flex-shrink-0">
+                      {typeIcon[place.type] || (
+                        <MapPin size={20} className="text-slate-400" />
+                      )}
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-sm font-bold truncate">{place.name}</p>
-                    <p className="text-[11px] text-slate-500 truncate">{place.detail}</p>
+                    <p className="text-white text-sm font-bold truncate">
+                      {place.name}
+                    </p>
+                    <p className="text-[11px] text-slate-500 truncate">
+                      {place.crossRef || place.detail}
+                    </p>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <div className="text-indigo-400 text-sm font-black">{place.distance}</div>
-                    <div className="text-[10px] text-slate-600">★ {place.rating}</div>
+                    <div className="text-indigo-400 text-sm font-black">
+                      {place.distance}
+                    </div>
+                    <div className="text-[10px] text-slate-600">
+                      ★ {place.rating}
+                      {place.reviewCount
+                        ? ` (${place.reviewCount})`
+                        : ""}
+                    </div>
                   </div>
                 </div>
               );
             })}
           </div>
         </>
+      )}
+
+      {/* Mini Map */}
+      {analysis.latitude && analysis.longitude && (
+        <MiniMap
+          lat={analysis.latitude}
+          lng={analysis.longitude}
+          hotelName={analysis.hotelName}
+          nearby={analysis.nearby}
+        />
       )}
 
       {/* Critical Warning */}
@@ -339,9 +682,12 @@ function HotelDetailContent() {
             </span>
           </div>
           <p className="text-sm text-slate-300 font-medium leading-relaxed">
-            <strong>{worstCategory.category}</strong> je najslabija tačka sa ocenom{" "}
-            <strong className="text-rose-400">{worstCategory.score.toFixed(1)}</strong>.{" "}
-            {worstCategory.detail}
+            <strong>{worstCategory.category}</strong> je najslabija tačka sa
+            ocenom{" "}
+            <strong className="text-rose-400">
+              {worstCategory.score.toFixed(1)}
+            </strong>
+            . {worstCategory.detail}
           </p>
         </div>
       )}
@@ -368,7 +714,10 @@ export default function HotelDetailPage() {
         <Suspense
           fallback={
             <div className="flex items-center justify-center pt-32">
-              <Fingerprint size={48} className="text-indigo-500/30 animate-pulse" />
+              <Fingerprint
+                size={48}
+                className="text-indigo-500/30 animate-pulse"
+              />
             </div>
           }
         >

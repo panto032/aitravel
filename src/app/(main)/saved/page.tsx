@@ -9,6 +9,7 @@ interface SavedItem {
   hotelName: string;
   location: string;
   aiScore: number | null;
+  analysis: Record<string, unknown> | null;
   createdAt: string;
 }
 
