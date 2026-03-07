@@ -648,53 +648,57 @@ export async function analyzeHotel(
 
     if (placeDetails) {
       // Log Google usage
-      await logApiUsage(userId, "analyze", "google", 0, 0, hotelName, false);
+      await logApiUsage(userId, "analyze", "google", 0, 0, normalizedName, false);
 
       // Extract photos
       photos = (placeDetails.photos || [])
         .slice(0, 10)
         .map((p) => getPhotoUrl(p.name));
 
-      // Step 2: Google Nearby Places
+      // Steps 2 & 3: Run Google Nearby + Gemini review analysis IN PARALLEL
+      const parallelTasks: Promise<void>[] = [];
+
+      // Task A: Google Nearby Places
       if (placeDetails.location) {
-        const rawNearby = await getNearbyPlaces(
-          placeDetails.location.latitude,
-          placeDetails.location.longitude
+        parallelTasks.push(
+          getNearbyPlaces(
+            placeDetails.location.latitude,
+            placeDetails.location.longitude
+          ).then((rawNearby) => {
+            nearbyPlaces = rawNearby
+              .filter(
+                (p) =>
+                  p.displayName?.text?.toLowerCase() !==
+                  normalizedName.toLowerCase()
+              )
+              .slice(0, 8)
+              .map((p) => {
+                const dist = placeDetails!.location
+                  ? calculateDistance(
+                      placeDetails!.location!.latitude,
+                      placeDetails!.location!.longitude,
+                      p.location?.latitude || 0,
+                      p.location?.longitude || 0
+                    )
+                  : 0;
+                return {
+                  name: p.displayName?.text || "",
+                  type: mapGoogleType(p.primaryType || ""),
+                  rating: p.rating || 0,
+                  distance: formatDistance(dist),
+                  detail: p.formattedAddress || "",
+                  photoUrl: p.photos?.[0]
+                    ? getPhotoUrl(p.photos[0].name)
+                    : undefined,
+                  reviewCount: p.userRatingCount,
+                };
+              });
+            dataQuality = "partial";
+          })
         );
-
-        nearbyPlaces = rawNearby
-          .filter(
-            (p) =>
-              p.displayName?.text?.toLowerCase() !==
-              hotelName.toLowerCase()
-          )
-          .slice(0, 8)
-          .map((p) => {
-            const dist = placeDetails!.location
-              ? calculateDistance(
-                  placeDetails!.location!.latitude,
-                  placeDetails!.location!.longitude,
-                  p.location?.latitude || 0,
-                  p.location?.longitude || 0
-                )
-              : 0;
-            return {
-              name: p.displayName?.text || "",
-              type: mapGoogleType(p.primaryType || ""),
-              rating: p.rating || 0,
-              distance: formatDistance(dist),
-              detail: p.formattedAddress || "",
-              photoUrl: p.photos?.[0]
-                ? getPhotoUrl(p.photos[0].name)
-                : undefined,
-              reviewCount: p.userRatingCount,
-            };
-          });
-
-        dataQuality = "partial";
       }
 
-      // Step 3: Gemini bulk review analysis
+      // Task B: Gemini bulk review analysis
       if (isGeminiConfigured() && placeDetails.reviews && placeDetails.reviews.length > 0) {
         const reviewInputs: ReviewInput[] = placeDetails.reviews.map(
           (r: GoogleReview) => ({
@@ -706,34 +710,21 @@ export async function analyzeHotel(
           })
         );
 
-        const nearbyInputs: NearbyInput[] = nearbyPlaces.map((p) => ({
-          name: p.name,
-          type: p.type,
-          rating: p.rating,
-          distance: p.distance,
-          reviewCount: p.reviewCount,
-        }));
-
-        geminiAnalysis = await analyzeReviewsBulk(
-          hotelName,
-          reviewInputs,
-          nearbyInputs
+        parallelTasks.push(
+          analyzeReviewsBulk(normalizedName, reviewInputs, []).then(
+            async (result) => {
+              if (result) {
+                geminiAnalysis = result;
+                await logApiUsage(userId, "analyze", "gemini", 0, 0, normalizedName, false);
+                dataQuality = "full";
+              }
+            }
+          )
         );
-
-        if (geminiAnalysis) {
-          // Log Gemini usage (estimated)
-          await logApiUsage(
-            userId,
-            "analyze",
-            "gemini",
-            0,
-            0,
-            hotelName,
-            false
-          );
-          dataQuality = "full";
-        }
       }
+
+      // Wait for both to complete
+      await Promise.all(parallelTasks);
     }
   }
 
