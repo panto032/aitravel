@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Search, Sparkles, Fingerprint, MapPin, Star,
@@ -484,7 +484,7 @@ function MapView({
 /* ============================================
    MAIN PAGE — Search Results
    ============================================ */
-export default function SearchPage() {
+function SearchPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { theme } = useTheme();
@@ -844,5 +844,13 @@ export default function SearchPage() {
         <FooterSignature />
       </main>
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense>
+      <SearchPageInner />
+    </Suspense>
   );
 }
