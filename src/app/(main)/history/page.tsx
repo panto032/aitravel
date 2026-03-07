@@ -9,10 +9,22 @@ import { useTheme } from "@/lib/theme";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { FooterSignature } from "@/components/ui/FooterSignature";
 
+interface HistoryHotel {
+  hotelName: string;
+  location: string;
+  aiScore?: number;
+  googlePlaceId?: string;
+  googleRating?: number;
+  photoUrl?: string;
+}
+
 interface HistoryEntry {
   id: string;
   query: string;
   results: {
+    destination?: string;
+    summary?: string;
+    results?: HistoryHotel[];
     location?: string;
     aiScore?: number;
     method?: string;
@@ -53,9 +65,14 @@ export default function HistoryPage() {
     }
   };
 
-  const handleOpenDetail = (item: HistoryEntry) => {
-    const params = new URLSearchParams({ name: item.query });
-    if (item.results?.location) params.set("location", item.results.location);
+  const handleOpenSearch = (item: HistoryEntry) => {
+    // Navigate to search page — results load from SearchCache (instant, no re-analysis)
+    router.push(`/search?q=${encodeURIComponent(item.query)}`);
+  };
+
+  const handleOpenHotel = (hotel: HistoryHotel) => {
+    const params = new URLSearchParams({ name: hotel.hotelName, location: hotel.location });
+    if (hotel.googlePlaceId) params.set("placeId", hotel.googlePlaceId);
     router.push(`/hotel/detail?${params.toString()}`);
   };
 
@@ -152,76 +169,107 @@ export default function HistoryPage() {
               </div>
             ) : filteredHistory.length > 0 ? (
               filteredHistory.map((item) => {
-                const score = item.results?.aiScore;
-                const status = getScoreStatus(score);
-                const method = item.results?.method || "Neural Scan";
+                const hotels = item.results?.results || [];
+                const destination = item.results?.destination || item.results?.location;
+                const hotelCount = hotels.length;
 
                 return (
-                  <div
-                    key={item.id}
-                    className="glass-card p-5 md:p-6 rounded-[30px] bento-hover shadow-lg flex items-center gap-4 md:gap-6 group cursor-pointer"
-                    onClick={() => handleOpenDetail(item)}
-                  >
-                    {/* Score Badge */}
+                  <div key={item.id} className="space-y-2">
+                    {/* Search Header Row */}
                     <div
-                      className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center border transition-all group-hover:scale-110 shrink-0 ${statusStyles[status]}`}
+                      className="glass-card p-5 md:p-6 rounded-[30px] bento-hover shadow-lg flex items-center gap-4 md:gap-6 group cursor-pointer"
+                      onClick={() => handleOpenSearch(item)}
                     >
-                      {score ? (
-                        <span className="font-black italic text-lg md:text-xl leading-none">
-                          {score.toFixed(1)}
-                        </span>
-                      ) : (
-                        <Globe size={24} />
-                      )}
-                    </div>
-
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-1.5 leading-none">
-                        <span className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-600 italic leading-none">
-                          {method}
-                        </span>
-                        <div className="w-1 h-1 rounded-full bg-slate-800" />
-                        <span className="text-[11px] font-bold text-slate-500 italic flex items-center gap-1.5 leading-none">
-                          <Clock size={10} /> {formatDate(item.createdAt)}
-                        </span>
+                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center border transition-all group-hover:scale-110 shrink-0 text-indigo-400 bg-indigo-500/5 border-indigo-500/20">
+                        <Search size={24} />
                       </div>
-                      <h3 className={`text-base md:text-xl font-black italic uppercase leading-none tracking-tight truncate mb-2 ${isDark ? "text-slate-100" : "text-slate-900"}`}>
-                        {item.query}
-                      </h3>
-                      {item.results?.location && (
-                        <div className="flex items-center gap-1.5 text-slate-500 text-xs font-bold uppercase tracking-widest italic leading-none">
-                          <MapPin size={10} className="text-indigo-500" />{" "}
-                          {item.results.location}
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3 mb-1.5 leading-none">
+                          <span className="text-[11px] font-bold text-slate-500 italic flex items-center gap-1.5 leading-none">
+                            <Clock size={10} /> {formatDate(item.createdAt)}
+                          </span>
+                          {hotelCount > 0 && (
+                            <>
+                              <div className="w-1 h-1 rounded-full bg-slate-800" />
+                              <span className="text-[11px] font-black uppercase tracking-[0.2em] text-indigo-500 italic leading-none">
+                                {hotelCount} hotela
+                              </span>
+                            </>
+                          )}
                         </div>
-                      )}
+                        <h3 className={`text-base md:text-xl font-black italic uppercase leading-none tracking-tight truncate mb-2 ${isDark ? "text-slate-100" : "text-slate-900"}`}>
+                          {item.query}
+                        </h3>
+                        {destination && (
+                          <div className="flex items-center gap-1.5 text-slate-500 text-xs font-bold uppercase tracking-widest italic leading-none">
+                            <MapPin size={10} className="text-indigo-500" />{" "}
+                            {destination}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          className="w-10 h-10 rounded-xl glass-card flex items-center justify-center text-slate-700 hover:text-indigo-400 transition-all opacity-0 group-hover:opacity-100 active:scale-90 cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenSearch(item);
+                          }}
+                        >
+                          <ArrowRight size={18} />
+                        </button>
+                        <button
+                          className={`w-10 h-10 rounded-xl glass-card flex items-center justify-center transition-all active:scale-90 cursor-pointer ${
+                            deleting === item.id
+                              ? "text-rose-500 animate-pulse"
+                              : "text-slate-700 hover:text-rose-500"
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(item.id);
+                          }}
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex items-center gap-2">
-                      <button
-                        className="w-10 h-10 rounded-xl glass-card flex items-center justify-center text-slate-700 hover:text-indigo-400 transition-all opacity-0 group-hover:opacity-100 active:scale-90 cursor-pointer"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleOpenDetail(item);
-                        }}
+                    {/* Hotel Sub-items (top 3) */}
+                    {hotels.slice(0, 3).map((hotel) => {
+                      const score = hotel.aiScore;
+                      const status = getScoreStatus(score);
+                      return (
+                        <div
+                          key={hotel.hotelName}
+                          className="ml-6 md:ml-10 glass-card p-4 rounded-[22px] flex items-center gap-4 group/hotel cursor-pointer hover:border-indigo-500/20 transition-all"
+                          onClick={() => handleOpenHotel(hotel)}
+                        >
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center border shrink-0 ${statusStyles[status]}`}>
+                            {score ? (
+                              <span className="font-black italic text-sm leading-none">{score.toFixed(1)}</span>
+                            ) : (
+                              <Globe size={16} />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className={`text-sm font-black italic uppercase leading-none tracking-tight truncate ${isDark ? "text-slate-200" : "text-slate-800"}`}>
+                              {hotel.hotelName}
+                            </h4>
+                            <span className="text-[11px] text-slate-500 font-bold italic leading-none">{hotel.location}</span>
+                          </div>
+                          <ArrowRight size={14} className="text-slate-600 group-hover/hotel:text-indigo-400 transition-colors shrink-0" />
+                        </div>
+                      );
+                    })}
+                    {hotels.length > 3 && (
+                      <div
+                        className="ml-6 md:ml-10 text-center py-2 text-[11px] font-black uppercase tracking-widest text-indigo-500 italic cursor-pointer hover:text-indigo-400 transition-colors"
+                        onClick={() => handleOpenSearch(item)}
                       >
-                        <ArrowRight size={18} />
-                      </button>
-                      <button
-                        className={`w-10 h-10 rounded-xl glass-card flex items-center justify-center transition-all active:scale-90 cursor-pointer ${
-                          deleting === item.id
-                            ? "text-rose-500 animate-pulse"
-                            : "text-slate-700 hover:text-rose-500"
-                        }`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(item.id);
-                        }}
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
+                        + jos {hotels.length - 3} hotela
+                      </div>
+                    )}
                   </div>
                 );
               })
