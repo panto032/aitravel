@@ -19,6 +19,10 @@ import {
   type NearbyInput,
   type GeminiAnalysis,
 } from "./gemini";
+import {
+  fetchReviewsByPlaceId,
+  isOutscraperConfigured,
+} from "./outscraper";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -698,28 +702,52 @@ export async function analyzeHotel(
         );
       }
 
-      // Task B: Gemini bulk review analysis
-      if (isGeminiConfigured() && placeDetails.reviews && placeDetails.reviews.length > 0) {
-        const reviewInputs: ReviewInput[] = placeDetails.reviews.map(
-          (r: GoogleReview) => ({
-            text: r.originalText?.text || r.text?.text || "",
-            rating: r.rating,
-            language: r.originalText?.languageCode || r.text?.languageCode,
-            date: r.publishTime,
-            author: r.authorAttribution?.displayName,
-          })
-        );
-
+      // Task B: Fetch reviews + Gemini analysis
+      // Priority: Outscraper (50+ reviews) > Google Places (max 5 reviews)
+      if (isGeminiConfigured()) {
         parallelTasks.push(
-          analyzeReviewsBulk(normalizedName, reviewInputs, []).then(
-            async (result) => {
+          (async () => {
+            let reviewInputs: ReviewInput[] = [];
+
+            // Try Outscraper first for more reviews (50 vs Google's 5)
+            if (isOutscraperConfigured() && googlePlaceId) {
+              const outscraper = await fetchReviewsByPlaceId(googlePlaceId, 50);
+              if (outscraper?.reviews_data?.length) {
+                reviewInputs = outscraper.reviews_data
+                  .filter((r) => r.review_text)
+                  .map((r) => ({
+                    text: r.review_text,
+                    rating: r.review_rating,
+                    date: r.review_datetime_utc,
+                    author: r.author_title,
+                  }));
+                await logApiUsage(userId, "analyze", "outscraper", 0, 0, normalizedName, false);
+                console.log(`[Reviews] Outscraper: ${reviewInputs.length} reviews`);
+              }
+            }
+
+            // Fallback to Google Places reviews (max 5)
+            if (reviewInputs.length === 0 && placeDetails!.reviews?.length) {
+              reviewInputs = placeDetails!.reviews.map((r: GoogleReview) => ({
+                text: r.originalText?.text || r.text?.text || "",
+                rating: r.rating,
+                language: r.originalText?.languageCode || r.text?.languageCode,
+                date: r.publishTime,
+                author: r.authorAttribution?.displayName,
+              }));
+              console.log(`[Reviews] Google fallback: ${reviewInputs.length} reviews`);
+            }
+
+            // Analyze with Gemini
+            if (reviewInputs.length > 0) {
+              const result = await analyzeReviewsBulk(normalizedName, reviewInputs, []);
               if (result) {
                 geminiAnalysis = result;
                 await logApiUsage(userId, "analyze", "gemini", 0, 0, normalizedName, false);
                 dataQuality = "full";
               }
             }
-          )
+          })()
         );
       }
 
