@@ -32,16 +32,11 @@ export function isOutscraperConfigured(): boolean {
 
 /**
  * Fetch Google Maps reviews for a hotel via Outscraper
- * @param query - Hotel name or Google Place ID (place_id:ChIJ...)
- * @param reviewsLimit - Number of reviews to fetch (default 50)
- * @param language - Language filter (empty = all languages)
- * @param sort - Sort order: "most_relevant", "newest", "highest_rating", "lowest_rating"
  */
 export async function fetchGoogleReviews(
   query: string,
   reviewsLimit = 50,
-  language = "",
-  sort = "newest"
+  sort = "most_relevant"
 ): Promise<OutscraperResult | null> {
   if (!API_KEY) {
     console.log("[Outscraper] No API key configured");
@@ -49,22 +44,22 @@ export async function fetchGoogleReviews(
   }
 
   try {
-    const params = new URLSearchParams({
-      query,
-      reviewsLimit: reviewsLimit.toString(),
-      sort,
-      async: "false",
-    });
+    // Build URL manually — Outscraper expects query as array-like param
+    const params = new URLSearchParams();
+    params.set("query", query);
+    params.set("reviewsLimit", reviewsLimit.toString());
+    params.set("sort", sort);
+    params.set("limit", "1");
+    params.set("async", "false");
+    params.set("language", "en");
 
-    if (language) {
-      params.set("language", language);
-    }
-
+    const url = `${BASE_URL}/maps/reviews-v3?${params.toString()}`;
     console.log(`[Outscraper] Fetching ${reviewsLimit} reviews for: ${query}`);
 
-    const res = await fetch(`${BASE_URL}/maps/reviews-v3?${params.toString()}`, {
+    const res = await fetch(url, {
       headers: {
         "X-API-KEY": API_KEY,
+        "client": "Node Custom",
       },
     });
 
@@ -74,19 +69,44 @@ export async function fetchGoogleReviews(
       return null;
     }
 
-    const data = await res.json();
+    const responseData = await res.json();
+    console.log(`[Outscraper] Response keys: ${Object.keys(responseData)}`);
 
-    // Outscraper returns { data: [[result]] } format
-    const results = data?.data;
-    if (!results || !results[0] || !results[0][0]) {
-      console.log("[Outscraper] No results found");
+    // Handle different response formats
+    let result: OutscraperResult | null = null;
+
+    if (responseData.data) {
+      // Format: { data: [[{...}]] } or { data: [{...}] }
+      const data = responseData.data;
+      if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data[0]) && data[0].length > 0) {
+          result = data[0][0] as OutscraperResult;
+        } else if (data[0] && !Array.isArray(data[0])) {
+          result = data[0] as OutscraperResult;
+        }
+      }
+    } else if (Array.isArray(responseData) && responseData.length > 0) {
+      // Format: [[{...}]] or [{...}]
+      if (Array.isArray(responseData[0]) && responseData[0].length > 0) {
+        result = responseData[0][0] as OutscraperResult;
+      } else if (responseData[0] && !Array.isArray(responseData[0])) {
+        result = responseData[0] as OutscraperResult;
+      }
+    }
+
+    if (!result) {
+      console.log("[Outscraper] No results found in response");
+      console.log(`[Outscraper] Response preview: ${JSON.stringify(responseData).slice(0, 500)}`);
       return null;
     }
 
-    const result = results[0][0] as OutscraperResult;
-    console.log(
-      `[Outscraper] Got ${result.reviews_data?.length || 0} reviews for "${result.name}"`
-    );
+    const reviewCount = result.reviews_data?.length || 0;
+    console.log(`[Outscraper] Got ${reviewCount} reviews for "${result.name}"`);
+
+    if (reviewCount === 0) {
+      console.log("[Outscraper] Zero reviews returned");
+      return null;
+    }
 
     return result;
   } catch (error) {
@@ -102,5 +122,5 @@ export async function fetchReviewsByPlaceId(
   placeId: string,
   reviewsLimit = 50
 ): Promise<OutscraperResult | null> {
-  return fetchGoogleReviews(`place_id:${placeId}`, reviewsLimit);
+  return fetchGoogleReviews(placeId, reviewsLimit);
 }
