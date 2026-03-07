@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Search, Sparkles, Fingerprint, MapPin, Star,
   List, Map as MapIcon, Loader2, X,
@@ -486,6 +486,7 @@ function MapView({
    ============================================ */
 export default function SearchPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
@@ -496,6 +497,7 @@ export default function SearchPage() {
   const [viewMode, setViewMode] = useState<"list" | "map">("list");
   const [activeFilter, setActiveFilter] = useState("Svi");
   const [fromCache, setFromCache] = useState(false);
+  const initialSearchDone = useRef(false);
 
   const handleSearch = useCallback(
     async (searchQuery: string) => {
@@ -517,6 +519,16 @@ export default function SearchPage() {
     },
     []
   );
+
+  // Auto-search from dashboard query parameter
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q && !initialSearchDone.current) {
+      initialSearchDone.current = true;
+      setQuery(q);
+      handleSearch(q);
+    }
+  }, [searchParams, handleSearch]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") handleSearch(query);

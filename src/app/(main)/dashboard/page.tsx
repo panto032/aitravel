@@ -181,7 +181,7 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-3 mb-10">
                   <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_15px_#10b981]" />
                   <span className="text-[11px] font-black text-emerald-500 uppercase tracking-[0.4em] italic leading-none">
-                    Live AI Travel Pulse
+                    AI Travel Radar
                   </span>
                 </div>
                 <h3 className={`text-3xl md:text-4xl font-black italic mb-8 leading-[0.9] tracking-tighter uppercase ${isDark ? "text-white" : "text-slate-900"}`}>
@@ -206,7 +206,7 @@ export default function DashboardPage() {
                 <TrendingUp className="text-indigo-500 group-hover:scale-110 transition-transform" size={48} />
                 <div>
                   <h4 className="text-xs font-black text-slate-600 uppercase mb-3 tracking-[0.5em] italic leading-none">
-                    Top Trending
+                    Popularno
                   </h4>
                   <div className={`text-3xl font-black italic tracking-tighter uppercase leading-none ${isDark ? "text-white" : "text-slate-900"}`}>
                     Halkidiki, GR

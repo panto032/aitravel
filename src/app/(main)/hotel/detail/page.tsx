@@ -849,7 +849,7 @@ function HotelDetailContent() {
               Analiticka Matrica
             </h3>
             <div className="flex items-center gap-2 text-[11px] font-black uppercase text-indigo-500 italic">
-              <BarChart3 size={16} /> Forensic Data
+              <BarChart3 size={16} /> Detaljna analiza
             </div>
           </div>
 
@@ -871,21 +871,25 @@ function HotelDetailContent() {
             ))}
           </div>
 
-          {/* AI Insider Forensic Tip */}
-          <div className={`glass-card p-10 md:p-14 rounded-[45px] border-purple-500/20 bg-gradient-to-br from-purple-600/5 to-transparent relative group overflow-hidden bento-hover`}>
+          {/* AI Insajderski Savet */}
+          <div className={`glass-card rounded-[45px] border-purple-500/20 bg-gradient-to-br from-purple-600/5 to-transparent relative group overflow-hidden bento-hover`}>
             <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:rotate-12 transition-transform duration-[4s]">
-              <Lightbulb size={220} />
+              <Lightbulb size={180} />
             </div>
-            <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-6">
-                <Sparkles size={22} className="text-purple-400" />
+            <div className="relative z-10 p-8 md:p-12">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-2xl bg-purple-500/10 flex items-center justify-center">
+                  <Sparkles size={20} className="text-purple-400" />
+                </div>
                 <h4 className="text-[11px] font-black uppercase tracking-[0.4em] text-purple-400 italic">
-                  AI Insider Forensic Tip
+                  AI Insajderski Savet
                 </h4>
               </div>
-              <p className={`text-xl md:text-3xl font-black italic leading-relaxed tracking-tight ${isDark ? "text-slate-100" : "text-slate-900"}`}>
-                &quot;{analysis.aiTip}&quot;
-              </p>
+              <div className={`mt-6 p-6 rounded-3xl ${isDark ? "bg-white/[0.02]" : "bg-black/[0.02]"}`}>
+                <p className={`text-lg md:text-xl font-bold italic leading-relaxed tracking-tight ${isDark ? "text-slate-200" : "text-slate-800"}`}>
+                  &ldquo;{analysis.aiTip}&rdquo;
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -1021,7 +1025,7 @@ function HotelDetailContent() {
       {analysis.nearby.length > 0 && (
         <div className="mb-24">
           <h3 className={`text-[12px] font-black uppercase tracking-[0.5em] italic px-2 mb-10 ${isDark ? "text-slate-500" : "text-slate-400"}`}>
-            Forensic Cross-Reference (Nearby)
+            Okolni sadrzaji
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {analysis.nearby.map((place, i) => (
