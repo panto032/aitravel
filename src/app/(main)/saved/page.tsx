@@ -163,7 +163,7 @@ export default function SavedPage() {
               </div>
               <div>
                 <p
-                  className={`text-[9px] font-black uppercase tracking-widest italic ${
+                  className={`text-[11px] font-black uppercase tracking-widest italic ${
                     isDark ? "text-slate-600" : "text-slate-400"
                   }`}
                 >
@@ -194,7 +194,7 @@ export default function SavedPage() {
               </div>
               <div>
                 <p
-                  className={`text-[9px] font-black uppercase tracking-widest italic ${
+                  className={`text-[11px] font-black uppercase tracking-widest italic ${
                     isDark ? "text-slate-600" : "text-slate-400"
                   }`}
                 >
@@ -240,7 +240,7 @@ export default function SavedPage() {
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className={`text-[9px] font-black uppercase tracking-widest ${
+                  className={`text-[11px] font-black uppercase tracking-widest ${
                     isDark ? "text-slate-600" : "text-slate-400"
                   }`}
                 >
@@ -268,7 +268,7 @@ export default function SavedPage() {
               </div>
             </div>
             <p
-              className={`text-[10px] font-black uppercase tracking-[0.3em] italic ${
+              className={`text-xs font-black uppercase tracking-[0.3em] italic ${
                 isDark ? "text-slate-700" : "text-slate-400"
               }`}
             >
@@ -305,7 +305,7 @@ export default function SavedPage() {
             </p>
             <button
               onClick={() => setSearchQuery("")}
-              className={`text-[10px] font-black uppercase tracking-widest italic ${
+              className={`text-xs font-black uppercase tracking-widest italic ${
                 isDark
                   ? "text-indigo-400 hover:text-indigo-300"
                   : "text-indigo-600 hover:text-indigo-500"
@@ -352,7 +352,7 @@ export default function SavedPage() {
             </p>
             <button
               onClick={() => router.push("/search")}
-              className="inline-flex items-center gap-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-[20px] font-black text-[10px] uppercase tracking-[0.2em] italic active:scale-95 transition-all shadow-xl shadow-indigo-600/20 hover:shadow-indigo-600/40"
+              className="inline-flex items-center gap-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-[20px] font-black text-xs uppercase tracking-[0.2em] italic active:scale-95 transition-all shadow-xl shadow-indigo-600/20 hover:shadow-indigo-600/40"
             >
               <Search size={16} /> Pokreni istragu
             </button>
@@ -405,7 +405,7 @@ export default function SavedPage() {
                     )}
                     {/* Status Label */}
                     <div
-                      className={`absolute top-4 right-4 text-[8px] font-black uppercase tracking-widest italic px-3 py-1.5 rounded-full border ${scoreColors.bg} ${scoreColors.border} ${scoreColors.text}`}
+                      className={`absolute top-4 right-4 text-[11px] font-black uppercase tracking-widest italic px-3 py-1.5 rounded-full border ${scoreColors.bg} ${scoreColors.border} ${scoreColors.text}`}
                     >
                       {scoreColors.status}
                     </div>
@@ -428,7 +428,7 @@ export default function SavedPage() {
                           {item.hotelName}
                         </h3>
                         <div
-                          className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest mt-1.5 italic ${
+                          className={`flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest mt-1.5 italic ${
                             isDark ? "text-slate-500" : "text-slate-400"
                           }`}
                         >
@@ -447,7 +447,7 @@ export default function SavedPage() {
                         {googleRating && (
                           <div className="flex flex-col">
                             <span
-                              className={`text-[8px] font-black uppercase italic leading-none ${
+                              className={`text-[11px] font-black uppercase italic leading-none ${
                                 isDark ? "text-slate-600" : "text-slate-400"
                               }`}
                             >
@@ -468,7 +468,7 @@ export default function SavedPage() {
                         )}
                         <div className="flex flex-col">
                           <span
-                            className={`text-[8px] font-black uppercase italic leading-none ${
+                            className={`text-[11px] font-black uppercase italic leading-none ${
                               isDark ? "text-slate-600" : "text-slate-400"
                             }`}
                           >
@@ -501,14 +501,14 @@ export default function SavedPage() {
                       }`}
                     >
                       <span
-                        className={`text-[9px] font-bold uppercase italic tracking-widest leading-none ${
+                        className={`text-[11px] font-bold uppercase italic tracking-widest leading-none ${
                           isDark ? "text-slate-700" : "text-slate-400"
                         }`}
                       >
                         Sacuvano {formatRelativeDate(item.createdAt)}
                       </span>
                       <div
-                        className={`flex items-center gap-2 text-[9px] font-black uppercase tracking-widest italic group-hover:translate-x-1 transition-transform ${
+                        className={`flex items-center gap-2 text-[11px] font-black uppercase tracking-widest italic group-hover:translate-x-1 transition-transform ${
                           isDark ? "text-indigo-400" : "text-indigo-600"
                         }`}
                       >
@@ -566,7 +566,7 @@ export default function SavedPage() {
         <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-[150] animate-fade-in">
           <button
             onClick={handleCompare}
-            className={`flex items-center gap-3 px-8 py-4 rounded-[20px] font-black text-[10px] uppercase tracking-[0.2em] italic shadow-2xl transition-all active:scale-95 cursor-pointer ${
+            className={`flex items-center gap-3 px-8 py-4 rounded-[20px] font-black text-xs uppercase tracking-[0.2em] italic shadow-2xl transition-all active:scale-95 cursor-pointer ${
               isDark
                 ? "bg-indigo-600/90 border border-indigo-500/40 text-white shadow-indigo-900/60 hover:bg-indigo-500"
                 : "bg-indigo-600 border border-indigo-400 text-white shadow-indigo-300/50 hover:bg-indigo-500"

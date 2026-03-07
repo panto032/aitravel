@@ -57,7 +57,7 @@ function CompareRow({
         <div className="text-slate-600 group-hover:text-indigo-400 transition-colors shrink-0">
           {icon}
         </div>
-        <span className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-500 italic leading-none">
+        <span className="text-xs md:text-[11px] font-black uppercase tracking-widest text-slate-500 italic leading-none">
           {label}
         </span>
       </div>
@@ -273,7 +273,7 @@ export default function ComparePage() {
         <div className="mb-12 px-2">
           <div className="flex items-center gap-3 mb-4">
             <Sparkles size={18} className="text-indigo-500" />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-500 italic leading-none">
+            <span className="text-xs font-black uppercase tracking-[0.3em] text-indigo-500 italic leading-none">
               Multi-Agent Intelligence
             </span>
           </div>
@@ -306,7 +306,7 @@ export default function ComparePage() {
                     selected[i]!.hotelName === winnerName && (
                       <div className="absolute top-4 right-4 text-emerald-500 flex items-center gap-2">
                         <Trophy size={16} />
-                        <span className="text-[9px] font-black uppercase tracking-widest leading-none">
+                        <span className="text-[11px] font-black uppercase tracking-widest leading-none">
                           Pobjednik
                         </span>
                       </div>
@@ -324,7 +324,7 @@ export default function ComparePage() {
                           className="text-indigo-500 flex-shrink-0"
                         />
                         <p
-                          className={`text-[10px] font-bold uppercase tracking-widest italic leading-none ${
+                          className={`text-xs font-bold uppercase tracking-widest italic leading-none ${
                             isDark ? "text-slate-500" : "text-slate-500"
                           }`}
                         >
@@ -341,7 +341,7 @@ export default function ComparePage() {
                           {selected[i]!.aiScore!.toFixed(1)}
                         </span>
                         <span
-                          className={`text-[9px] font-black uppercase tracking-widest italic ${
+                          className={`text-[11px] font-black uppercase tracking-widest italic ${
                             isDark ? "text-slate-600" : "text-slate-400"
                           }`}
                         >
@@ -456,7 +456,7 @@ export default function ComparePage() {
                           {item.hotelName}
                         </p>
                         <p
-                          className={`text-[10px] font-bold uppercase tracking-widest italic leading-none mt-1 ${
+                          className={`text-xs font-bold uppercase tracking-widest italic leading-none mt-1 ${
                             isDark ? "text-slate-500" : "text-slate-500"
                           }`}
                         >
@@ -474,7 +474,7 @@ export default function ComparePage() {
 
             <button
               onClick={() => setPicking(null)}
-              className={`mt-6 text-[10px] font-black uppercase tracking-widest italic transition-colors cursor-pointer ${
+              className={`mt-6 text-xs font-black uppercase tracking-widest italic transition-colors cursor-pointer ${
                 isDark
                   ? "text-slate-500 hover:text-white"
                   : "text-slate-400 hover:text-slate-900"
@@ -499,7 +499,7 @@ export default function ComparePage() {
                   {hotel1.aiScore >= hotel2.aiScore && (
                     <div className="absolute top-4 right-4 text-emerald-500 flex items-center gap-2">
                       <Trophy size={16} />
-                      <span className="text-[9px] font-black uppercase tracking-widest leading-none">
+                      <span className="text-[11px] font-black uppercase tracking-widest leading-none">
                         Pobjednik
                       </span>
                     </div>
@@ -511,7 +511,7 @@ export default function ComparePage() {
                   <div className="flex items-center justify-center gap-2 mt-3">
                     <MapPin size={12} className="text-indigo-500" />
                     <span
-                      className={`text-[10px] font-bold uppercase tracking-widest italic leading-none ${
+                      className={`text-xs font-bold uppercase tracking-widest italic leading-none ${
                         isDark ? "text-slate-500" : "text-slate-500"
                       }`}
                     >
@@ -523,7 +523,7 @@ export default function ComparePage() {
                   {hotel2.aiScore > hotel1.aiScore && (
                     <div className="absolute top-4 right-4 text-emerald-500 flex items-center gap-2">
                       <Trophy size={16} />
-                      <span className="text-[9px] font-black uppercase tracking-widest leading-none">
+                      <span className="text-[11px] font-black uppercase tracking-widest leading-none">
                         Pobjednik
                       </span>
                     </div>
@@ -544,7 +544,7 @@ export default function ComparePage() {
                       className={isDark ? "text-slate-600" : "text-slate-400"}
                     />
                     <span
-                      className={`text-[10px] font-bold uppercase tracking-widest italic leading-none ${
+                      className={`text-xs font-bold uppercase tracking-widest italic leading-none ${
                         isDark ? "text-slate-500" : "text-slate-500"
                       }`}
                     >

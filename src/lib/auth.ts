@@ -37,6 +37,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
+          console.log("[Auth] Missing email or password");
           return null;
         }
 
@@ -45,6 +46,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         });
 
         if (!user || !user.hashedPassword) {
+          console.log("[Auth] User not found or no password:", credentials.email);
           return null;
         }
 
@@ -54,9 +56,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         );
 
         if (!isValid) {
+          console.log("[Auth] Invalid password for:", credentials.email);
           return null;
         }
 
+        console.log("[Auth] Login success for:", user.email);
         return {
           id: user.id,
           email: user.email,
@@ -71,10 +75,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   session: {
     strategy: "jwt",
   },
+  trustHost: true,
   pages: {
     signIn: "/login",
   },
   callbacks: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async signIn({ user, account }: any) {
+      // Allow credentials sign-in without adapter interference
+      if (account?.provider === "credentials") {
+        return true;
+      }
+      // Allow OAuth sign-in (adapter handles account linking)
+      return true;
+    },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async jwt({ token, user, trigger }: any) {
       if (user) {
@@ -84,35 +98,39 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
 
       // Auto-promote first user to ADMIN if no admin exists
-      if (token.id && token.role !== "ADMIN") {
-        const adminExists = await prisma.user.findFirst({
-          where: { role: "ADMIN" },
-          select: { id: true },
-        });
-        if (!adminExists) {
-          const firstUser = await prisma.user.findFirst({
-            orderBy: { createdAt: "asc" },
+      try {
+        if (token.id && token.role !== "ADMIN") {
+          const adminExists = await prisma.user.findFirst({
+            where: { role: "ADMIN" },
             select: { id: true },
           });
-          if (firstUser && firstUser.id === token.id) {
-            await prisma.user.update({
-              where: { id: token.id as string },
-              data: { role: "ADMIN" },
+          if (!adminExists) {
+            const firstUser = await prisma.user.findFirst({
+              orderBy: { createdAt: "asc" },
+              select: { id: true },
             });
-            token.role = "ADMIN";
+            if (firstUser && firstUser.id === token.id) {
+              await prisma.user.update({
+                where: { id: token.id as string },
+                data: { role: "ADMIN" },
+              });
+              token.role = "ADMIN";
+            }
           }
         }
-      }
 
-      if (trigger === "update" && token.id) {
-        const dbUser = await prisma.user.findUnique({
-          where: { id: token.id as string },
-          select: { role: true, plan: true },
-        });
-        if (dbUser) {
-          token.role = dbUser.role;
-          token.plan = dbUser.plan;
+        if (trigger === "update" && token.id) {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { role: true, plan: true },
+          });
+          if (dbUser) {
+            token.role = dbUser.role;
+            token.plan = dbUser.plan;
+          }
         }
+      } catch (error) {
+        console.error("JWT callback DB error:", error);
       }
       return token;
     },

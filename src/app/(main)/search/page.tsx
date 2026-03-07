@@ -56,7 +56,7 @@ function ScanningScreen({ query, isDark }: { query: string; isDark: boolean }) {
             <div className="scanning-active-line" />
             <div className="flex flex-col items-center justify-center h-full gap-3">
               <Fingerprint size={64} className={`${isDark ? "text-indigo-400" : "text-indigo-600"} opacity-60`} />
-              <div className={`text-[10px] font-black tracking-[0.4em] uppercase italic ${
+              <div className={`text-xs font-black tracking-[0.4em] uppercase italic ${
                 isDark ? "text-indigo-500" : "text-indigo-600"
               }`}>
                 Deep Scanning
@@ -71,7 +71,7 @@ function ScanningScreen({ query, isDark }: { query: string; isDark: boolean }) {
       }`}>
         Analiziram &quot;{query}&quot;...
       </h2>
-      <p className={`text-[10px] font-black uppercase tracking-[0.3em] italic opacity-80 mb-6 ${
+      <p className={`text-xs font-black uppercase tracking-[0.3em] italic opacity-80 mb-6 ${
         isDark ? "text-indigo-400" : "text-indigo-600"
       }`}>
         {steps[step] || steps[0]}
@@ -149,7 +149,7 @@ function ResultCard({
         {/* Verified badge - top left */}
         {result.verified && (
           <div className="absolute top-4 left-4 md:top-6 md:left-6 z-20">
-            <div className="bg-emerald-500/20 backdrop-blur-xl border border-emerald-500/30 text-emerald-400 px-3 py-1 md:px-4 md:py-1.5 rounded-[10px] md:rounded-[12px] text-[8px] md:text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-2xl">
+            <div className="bg-emerald-500/20 backdrop-blur-xl border border-emerald-500/30 text-emerald-400 px-3 py-1 md:px-4 md:py-1.5 rounded-[10px] md:rounded-[12px] text-[11px] md:text-[11px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-2xl">
               <Check size={10} strokeWidth={4} /> Verifikovano
             </div>
           </div>
@@ -157,7 +157,7 @@ function ResultCard({
 
         {/* AI Score badge - bottom right */}
         <div className={`absolute bottom-4 right-4 md:bottom-6 md:right-6 z-20 w-16 h-16 md:w-18 md:h-18 rounded-[18px] md:rounded-[22px] flex flex-col items-center justify-center font-black italic shadow-2xl border transition-all group-hover:rotate-6 ${scoreBg}`}>
-          <span className="text-[7px] md:text-[8px] uppercase not-italic opacity-60 leading-none mb-1 font-black">AI Score</span>
+          <span className="text-[7px] md:text-[11px] uppercase not-italic opacity-60 leading-none mb-1 font-black">AI Score</span>
           <span className="text-2xl md:text-3xl leading-none tracking-tighter">{result.aiScore.toFixed(1)}</span>
         </div>
 
@@ -168,7 +168,7 @@ function ResultCard({
           }`}>
             {result.hotelName}
           </h3>
-          <div className="flex items-center gap-1.5 text-white/50 text-[9px] md:text-[10px] font-bold uppercase tracking-widest mt-2">
+          <div className="flex items-center gap-1.5 text-white/50 text-[11px] md:text-xs font-bold uppercase tracking-widest mt-2">
             <MapPin size={10} className="text-indigo-400" /> {result.location}
           </div>
         </div>
@@ -191,7 +191,7 @@ function ResultCard({
           isDark ? "bg-white/5 border-white/5" : "bg-black/5 border-black/5"
         }`}>
           <div className="flex flex-col gap-0.5">
-            <span className={`text-[7px] md:text-[8px] font-black uppercase tracking-widest italic leading-none ${
+            <span className={`text-[7px] md:text-[11px] font-black uppercase tracking-widest italic leading-none ${
               isDark ? "text-slate-500" : "text-slate-400"
             }`}>Google</span>
             <div className="flex items-center gap-1.5 text-yellow-500 font-black italic text-sm md:text-base">
@@ -201,7 +201,7 @@ function ResultCard({
           </div>
           <div className={`w-px h-8 ${isDark ? "bg-white/10" : "bg-black/10"}`} />
           <div className="flex flex-col gap-0.5">
-            <span className={`text-[7px] md:text-[8px] font-black uppercase tracking-widest italic leading-none ${
+            <span className={`text-[7px] md:text-[11px] font-black uppercase tracking-widest italic leading-none ${
               isDark ? "text-slate-500" : "text-slate-400"
             }`}>AI Trust</span>
             <div className="flex items-center gap-1.5 text-indigo-500 font-black italic text-sm md:text-base">
@@ -210,10 +210,10 @@ function ResultCard({
           </div>
           <div className={`w-px h-8 ${isDark ? "bg-white/10" : "bg-black/10"}`} />
           <div className="text-right flex flex-col">
-            <span className={`text-[7px] md:text-[8px] font-black uppercase tracking-widest italic ${
+            <span className={`text-[7px] md:text-[11px] font-black uppercase tracking-widest italic ${
               isDark ? "text-slate-600" : "text-slate-400"
             }`}>Volume</span>
-            <span className={`text-[10px] md:text-[11px] font-black italic leading-none ${
+            <span className={`text-xs md:text-[11px] font-black italic leading-none ${
               isDark ? "text-slate-400" : "text-slate-900"
             }`}>
               {result.googleReviewCount
@@ -236,7 +236,7 @@ function ResultCard({
             {result.tags.slice(0, 3).map((tag) => (
               <span
                 key={tag}
-                className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg ${
+                className={`text-[11px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg ${
                   isDark
                     ? "text-indigo-400 bg-indigo-500/10"
                     : "text-indigo-600 bg-indigo-100"
@@ -264,14 +264,14 @@ function ResultCard({
             <div className="w-6 h-6 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-500">
               <Zap size={12} fill="currentColor" />
             </div>
-            <span className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.25em] text-indigo-500 italic leading-none">
+            <span className="text-[11px] md:text-[11px] font-black uppercase tracking-[0.25em] text-indigo-500 italic leading-none">
               Otvori dosije
             </span>
           </div>
           <div className={`flex items-center gap-2 group-hover/link:translate-x-1 transition-all ${
             isDark ? "text-indigo-400" : "text-indigo-600"
           }`}>
-            <span className="text-[8px] font-black italic uppercase opacity-0 group-hover/link:opacity-100 transition-opacity">
+            <span className="text-[11px] font-black italic uppercase opacity-0 group-hover/link:opacity-100 transition-opacity">
               Detalji
             </span>
             <ArrowRight size={16} />
@@ -365,7 +365,7 @@ function MapView({
         <h3 className={`text-xl md:text-3xl font-black uppercase tracking-tighter italic relative z-10 ${
           isDark ? "text-slate-400" : "text-slate-700"
         }`}>Nema koordinata</h3>
-        <p className={`text-[9px] font-black uppercase tracking-[0.4em] mt-3 italic relative z-10 ${
+        <p className={`text-[11px] font-black uppercase tracking-[0.4em] mt-3 italic relative z-10 ${
           isDark ? "text-slate-600" : "text-slate-400"
         }`}>
           Hoteli nisu pronadjeni na Google-u.
@@ -413,14 +413,14 @@ function MapView({
                     </span>
                   </span>
                 )}
-                <span className={`text-[10px] font-bold uppercase tracking-wider ${
+                <span className={`text-xs font-bold uppercase tracking-wider ${
                   isDark ? "text-slate-500" : "text-slate-400"
                 }`}>{selectedHotel.location}</span>
               </div>
             </div>
             <button
               onClick={() => onHotelClick(selectedHotel)}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-[12px] text-[9px] font-black uppercase tracking-widest flex-shrink-0 btn-glow transition-all"
+              className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-[12px] text-[11px] font-black uppercase tracking-widest flex-shrink-0 btn-glow transition-all"
             >
               Analiza
             </button>
@@ -594,7 +594,7 @@ export default function SearchPage() {
             <button
               onClick={() => handleSearch(query)}
               disabled={loading}
-              className="bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-500 hover:to-purple-600 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-[20px] md:rounded-[24px] font-black text-[10px] md:text-[11px] uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2 btn-glow border border-white/10"
+              className="bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-500 hover:to-purple-600 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-[20px] md:rounded-[24px] font-black text-xs md:text-[11px] uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2 btn-glow border border-white/10"
             >
               {loading ? (
                 <Loader2 size={16} className="animate-spin" />
@@ -627,7 +627,7 @@ export default function SearchPage() {
               </p>
               <button
                 onClick={() => handleSearch(query)}
-                className="text-indigo-500 text-[10px] font-black uppercase tracking-widest italic hover:underline decoration-2 underline-offset-4 transition-all"
+                className="text-indigo-500 text-xs font-black uppercase tracking-widest italic hover:underline decoration-2 underline-offset-4 transition-all"
               >
                 Pokusaj ponovo
               </button>
@@ -672,7 +672,7 @@ export default function SearchPage() {
                     setQuery(term);
                     handleSearch(term);
                   }}
-                  className={`glass-card rounded-full px-5 py-2.5 text-[10px] font-black uppercase tracking-widest transition-all bento-hover ${
+                  className={`glass-card rounded-full px-5 py-2.5 text-xs font-black uppercase tracking-widest transition-all bento-hover ${
                     isDark
                       ? "text-slate-500 hover:text-white hover:border-indigo-500/40"
                       : "text-slate-400 hover:text-slate-900 hover:border-indigo-300/40"
@@ -691,7 +691,7 @@ export default function SearchPage() {
             {/* Results Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 px-1">
               <div>
-                <h2 className={`text-[9px] font-black uppercase tracking-[0.3em] italic leading-none mb-2 ${
+                <h2 className={`text-[11px] font-black uppercase tracking-[0.3em] italic leading-none mb-2 ${
                   isDark ? "text-slate-500" : "text-slate-400"
                 }`}>
                   Istraga zavrsena
@@ -715,7 +715,7 @@ export default function SearchPage() {
                     : "bg-indigo-50 border-indigo-100 text-indigo-600"
                 }`}>
                   <Sparkles size={12} />
-                  <span className="text-[8px] font-black uppercase tracking-widest italic">Verifikovano</span>
+                  <span className="text-[11px] font-black uppercase tracking-widest italic">Verifikovano</span>
                 </div>
               </div>
             </div>
@@ -725,7 +725,7 @@ export default function SearchPage() {
               <div className="glass-card p-1 rounded-[20px] flex w-fit">
                 <button
                   onClick={() => setViewMode("list")}
-                  className={`flex items-center gap-2 px-6 py-2.5 rounded-[16px] text-[9px] font-black uppercase tracking-widest transition-all ${
+                  className={`flex items-center gap-2 px-6 py-2.5 rounded-[16px] text-[11px] font-black uppercase tracking-widest transition-all ${
                     viewMode === "list"
                       ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
                       : isDark ? "text-slate-500 hover:text-white" : "text-slate-400 hover:text-slate-900"
@@ -735,7 +735,7 @@ export default function SearchPage() {
                 </button>
                 <button
                   onClick={() => setViewMode("map")}
-                  className={`flex items-center gap-2 px-6 py-2.5 rounded-[16px] text-[9px] font-black uppercase tracking-widest transition-all ${
+                  className={`flex items-center gap-2 px-6 py-2.5 rounded-[16px] text-[11px] font-black uppercase tracking-widest transition-all ${
                     viewMode === "map"
                       ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
                       : isDark ? "text-slate-500 hover:text-white" : "text-slate-400 hover:text-slate-900"
@@ -751,7 +751,7 @@ export default function SearchPage() {
                   <button
                     key={f}
                     onClick={() => setActiveFilter(f)}
-                    className={`whitespace-nowrap px-5 py-2 rounded-full border text-[9px] font-black uppercase tracking-widest transition-all ${
+                    className={`whitespace-nowrap px-5 py-2 rounded-full border text-[11px] font-black uppercase tracking-widest transition-all ${
                       activeFilter === f
                         ? isDark
                           ? "bg-indigo-600/20 border-indigo-500/40 text-indigo-400 shadow-xl shadow-indigo-500/10"
@@ -781,7 +781,7 @@ export default function SearchPage() {
                 <Sparkles size={32} />
               </div>
               <div>
-                <h4 className={`text-[9px] font-black uppercase tracking-widest italic mb-2 ${
+                <h4 className={`text-[11px] font-black uppercase tracking-widest italic mb-2 ${
                   isDark ? "text-emerald-400" : "text-emerald-600"
                 }`}>
                   AI Instant Insight

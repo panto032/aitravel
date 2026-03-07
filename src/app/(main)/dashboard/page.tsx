@@ -104,13 +104,13 @@ export default function DashboardPage() {
             </div>
             <div className="flex gap-4">
               <div className="glass-card px-6 py-4 rounded-[28px] border-white/5 flex flex-col gap-1">
-                <span className={`text-[9px] font-black uppercase tracking-widest italic ${isDark ? "text-slate-500" : "text-slate-400"}`}>
+                <span className={`text-[11px] font-black uppercase tracking-widest italic ${isDark ? "text-slate-500" : "text-slate-400"}`}>
                   Preostale Analize
                 </span>
                 <span className="text-xl font-black italic text-indigo-400 leading-none">7 / 10</span>
               </div>
               <div className="glass-card px-6 py-4 rounded-[28px] border-emerald-500/10 flex flex-col gap-1">
-                <span className={`text-[9px] font-black uppercase tracking-widest italic ${isDark ? "text-slate-500" : "text-slate-400"}`}>
+                <span className={`text-[11px] font-black uppercase tracking-widest italic ${isDark ? "text-slate-500" : "text-slate-400"}`}>
                   Status Sistema
                 </span>
                 <span className="text-xl font-black italic text-emerald-400 leading-none flex items-center gap-2">
@@ -162,7 +162,7 @@ export default function DashboardPage() {
                   {cat.name}
                 </span>
                 {!cat.active && (
-                  <span className="absolute -top-2 -right-2 text-[8px] font-black bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full border border-amber-500/30">
+                  <span className="absolute -top-2 -right-2 text-[11px] font-black bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full border border-amber-500/30">
                     USKORO
                   </span>
                 )}
@@ -205,13 +205,13 @@ export default function DashboardPage() {
               <div className="glass-card flex-1 p-10 rounded-[50px] flex flex-col justify-between border-white/5 group cursor-pointer bento-hover">
                 <TrendingUp className="text-indigo-500 group-hover:scale-110 transition-transform" size={48} />
                 <div>
-                  <h4 className="text-[10px] font-black text-slate-600 uppercase mb-3 tracking-[0.5em] italic leading-none">
+                  <h4 className="text-xs font-black text-slate-600 uppercase mb-3 tracking-[0.5em] italic leading-none">
                     Top Trending
                   </h4>
                   <div className={`text-3xl font-black italic tracking-tighter uppercase leading-none ${isDark ? "text-white" : "text-slate-900"}`}>
                     Halkidiki, GR
                   </div>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase mt-3 tracking-widest italic leading-none">
+                  <p className="text-xs text-slate-500 font-bold uppercase mt-3 tracking-widest italic leading-none">
                     12.4k istraga danas
                   </p>
                 </div>
@@ -219,7 +219,7 @@ export default function DashboardPage() {
 
               <div className="glass-card flex-1 p-10 rounded-[50px] flex flex-col gap-6 border-white/5 bento-hover">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em] italic leading-none">
+                  <h4 className="text-xs font-black text-slate-600 uppercase tracking-[0.3em] italic leading-none">
                     Nedavne istrage
                   </h4>
                   <Clock size={16} className="text-slate-600" />
@@ -248,7 +248,7 @@ export default function DashboardPage() {
             <div className="mb-8">
               <Link
                 href="/admin"
-                className="glass-card px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-rose-400 border-rose-500/20 hover:bg-rose-500/10 transition-all inline-flex"
+                className="glass-card px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest text-rose-400 border-rose-500/20 hover:bg-rose-500/10 transition-all inline-flex"
               >
                 Admin Panel
               </Link>

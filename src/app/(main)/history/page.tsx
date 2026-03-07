@@ -135,7 +135,7 @@ export default function HistoryPage() {
           {/* Timeline Divider */}
           <div className="flex items-center gap-4 mb-8 px-4 opacity-30">
             <div className="h-px flex-1 bg-current" />
-            <span className="text-[9px] font-black uppercase tracking-[0.4em] italic">
+            <span className="text-[11px] font-black uppercase tracking-[0.4em] italic">
               Timeline Logs
             </span>
             <div className="h-px flex-1 bg-current" />
@@ -178,11 +178,11 @@ export default function HistoryPage() {
                     {/* Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-1.5 leading-none">
-                        <span className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-600 italic leading-none">
+                        <span className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-600 italic leading-none">
                           {method}
                         </span>
                         <div className="w-1 h-1 rounded-full bg-slate-800" />
-                        <span className="text-[8px] font-bold text-slate-500 italic flex items-center gap-1.5 leading-none">
+                        <span className="text-[11px] font-bold text-slate-500 italic flex items-center gap-1.5 leading-none">
                           <Clock size={10} /> {formatDate(item.createdAt)}
                         </span>
                       </div>
@@ -190,7 +190,7 @@ export default function HistoryPage() {
                         {item.query}
                       </h3>
                       {item.results?.location && (
-                        <div className="flex items-center gap-1.5 text-slate-500 text-[10px] font-bold uppercase tracking-widest italic leading-none">
+                        <div className="flex items-center gap-1.5 text-slate-500 text-xs font-bold uppercase tracking-widest italic leading-none">
                           <MapPin size={10} className="text-indigo-500" />{" "}
                           {item.results.location}
                         </div>

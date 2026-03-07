@@ -9,7 +9,7 @@ export function FooterSignature() {
   return (
     <div className="w-full flex justify-center py-8 pb-28">
       <p
-        className={`text-[9px] font-black uppercase tracking-[0.4em] italic ${
+        className={`text-[11px] font-black uppercase tracking-[0.4em] italic ${
           isDark ? "text-slate-800" : "text-slate-400"
         }`}
       >

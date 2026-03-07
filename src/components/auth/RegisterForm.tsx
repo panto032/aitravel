@@ -76,7 +76,7 @@ export function RegisterForm() {
     <form onSubmit={handleSubmit} className="space-y-4">
       {fields.map((f) => (
         <div key={f.label}>
-          <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">
+          <label className="block text-xs font-black uppercase tracking-widest text-slate-500 mb-2">
             {f.label}
           </label>
           <input
@@ -115,7 +115,7 @@ export function RegisterForm() {
           <div className="w-full border-t border-white/5" />
         </div>
         <div className="relative flex justify-center">
-          <span className="bg-[#020205] px-4 text-[10px] font-black uppercase tracking-widest text-slate-600">ili</span>
+          <span className="bg-[#020205] px-4 text-xs font-black uppercase tracking-widest text-slate-600">ili</span>
         </div>
       </div>
 

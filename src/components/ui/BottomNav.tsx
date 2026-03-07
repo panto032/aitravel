@@ -16,21 +16,21 @@ export function BottomNav() {
 
   return (
     <nav
-      className={`fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] md:w-auto md:min-w-[500px] h-16 md:h-20 backdrop-blur-3xl border rounded-[30px] md:rounded-[40px] flex justify-around items-center px-8 z-[200] shadow-2xl transition-all ${
+      className={`fixed bottom-4 left-1/2 -translate-x-1/2 w-[94%] md:w-auto md:min-w-[500px] h-[72px] md:h-20 backdrop-blur-3xl border rounded-[28px] md:rounded-[40px] flex justify-around items-center px-4 md:px-8 z-[200] shadow-2xl transition-all ${
         isDark
           ? "bg-slate-950/80 border-white/10 ring-1 ring-white/5"
           : "bg-white/90 border-black/10"
       }`}
     >
       <NavItem
-        icon={<Home size={22} />}
+        icon={<Home size={24} />}
         label="Home"
         active={isActive("/dashboard")}
         href="/dashboard"
         isDark={isDark}
       />
       <NavItem
-        icon={<Globe size={22} />}
+        icon={<Globe size={24} />}
         label="Istrazi"
         active={isActive("/search")}
         href="/search"
@@ -42,21 +42,21 @@ export function BottomNav() {
         <div className="absolute -inset-4 bg-indigo-500/20 blur-2xl rounded-full pulse-ring" />
         <button
           onClick={() => router.push("/search")}
-          className="relative w-14 h-14 md:w-16 md:h-16 rounded-2xl md:rounded-3xl bg-gradient-to-br from-indigo-600 to-purple-700 flex items-center justify-center shadow-[0_15px_40px_rgba(99,102,241,0.5)] -mt-10 md:-mt-14 border border-white/20 cursor-pointer active:scale-90 transition-all hover:scale-110"
+          className="relative w-16 h-16 md:w-18 md:h-18 rounded-2xl md:rounded-3xl bg-gradient-to-br from-indigo-600 to-purple-700 flex items-center justify-center shadow-[0_15px_40px_rgba(99,102,241,0.5)] -mt-10 md:-mt-14 border border-white/20 cursor-pointer active:scale-90 transition-all hover:scale-110"
         >
-          <Fingerprint size={28} className="text-white" />
+          <Fingerprint size={30} className="text-white" />
         </button>
       </div>
 
       <NavItem
-        icon={<History size={22} />}
+        icon={<History size={24} />}
         label="Arhiva"
         active={isActive("/history")}
         href="/history"
         isDark={isDark}
       />
       <NavItem
-        icon={<User size={22} />}
+        icon={<User size={24} />}
         label="Profil"
         active={isActive("/profile")}
         href="/profile"
@@ -82,7 +82,7 @@ function NavItem({
   return (
     <Link
       href={href}
-      className={`flex flex-col items-center gap-1 transition-all duration-300 ${
+      className={`flex flex-col items-center gap-1 min-w-[48px] min-h-[48px] justify-center transition-all duration-300 ${
         active
           ? "text-indigo-500 scale-110"
           : isDark
@@ -91,7 +91,7 @@ function NavItem({
       }`}
     >
       {icon}
-      <span className="text-[8px] font-black uppercase tracking-tighter leading-none italic">
+      <span className="text-[11px] font-black uppercase tracking-tighter leading-none italic">
         {label}
       </span>
     </Link>

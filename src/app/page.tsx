@@ -102,7 +102,7 @@ function PreviewModal({
               <h3 className={`text-xl font-black uppercase tracking-tight italic ${isDark ? "text-white" : "text-slate-900"}`}>
                 {hotel.name}
               </h3>
-              <p className="text-[10px] text-indigo-400 font-black uppercase tracking-[0.3em] mt-1">
+              <p className="text-xs text-indigo-400 font-black uppercase tracking-[0.3em] mt-1">
                 AI Detektivski Sken
               </p>
             </div>
@@ -123,7 +123,7 @@ function PreviewModal({
               return (
                 <div
                   key={s.category}
-                  className={`glass-card p-4 rounded-2xl border-${catColor}-500/20 text-${catColor}-500 text-[10px] font-black uppercase tracking-widest text-center`}
+                  className={`glass-card p-4 rounded-2xl border-${catColor}-500/20 text-${catColor}-500 text-xs font-black uppercase tracking-widest text-center`}
                 >
                   {s.category} {s.score.toFixed(1)}
                 </div>
@@ -135,7 +135,7 @@ function PreviewModal({
         {/* Pros / Cons */}
         <div className="grid grid-cols-2 gap-4 mb-8">
           <div>
-            <div className="text-[10px] text-emerald-400 font-black uppercase tracking-widest mb-2">
+            <div className="text-xs text-emerald-400 font-black uppercase tracking-widest mb-2">
               Prednosti
             </div>
             {hotel.pros.map((p, i) => (
@@ -146,7 +146,7 @@ function PreviewModal({
             ))}
           </div>
           <div>
-            <div className="text-[10px] text-rose-400 font-black uppercase tracking-widest mb-2">
+            <div className="text-xs text-rose-400 font-black uppercase tracking-widest mb-2">
               Mane
             </div>
             {hotel.cons.map((c, i) => (
@@ -164,7 +164,7 @@ function PreviewModal({
         >
           Prikaži kompletan dosije
         </Link>
-        <p className={`text-center text-[10px] mt-4 ${isDark ? "text-slate-600" : "text-slate-400"}`}>
+        <p className={`text-center text-xs mt-4 ${isDark ? "text-slate-600" : "text-slate-400"}`}>
           Za kompletnu analizu sa svim kategorijama
         </p>
       </div>
@@ -239,7 +239,7 @@ export default function LandingPage() {
         {/* 1. HERO */}
         <section className="text-center pt-16 md:pt-32 pb-32 px-6">
           <div className="inline-flex items-center gap-2 bg-emerald-500/10 text-emerald-500 px-5 py-2 rounded-full border border-emerald-500/20 mb-10 animate-bounce shadow-lg shadow-emerald-500/5">
-            <span className="text-[10px] font-black uppercase tracking-widest leading-none italic">
+            <span className="text-xs font-black uppercase tracking-widest leading-none italic">
               Besplatno — Zauvek
             </span>
           </div>
@@ -288,14 +288,14 @@ export default function LandingPage() {
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <div className={`w-1.5 h-1.5 rounded-full bg-${card.color}-500`} />
-                    <span className={`text-[9px] font-black uppercase tracking-widest text-${card.color}-500 italic`}>
+                    <span className={`text-[11px] font-black uppercase tracking-widest text-${card.color}-500 italic`}>
                       {card.issue}
                     </span>
                   </div>
                   <h4 className={`text-lg font-black uppercase tracking-tight italic leading-none ${isDark ? "text-white" : "text-slate-900"}`}>
                     {card.name}
                   </h4>
-                  <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-1 italic">
+                  <p className="text-[11px] text-slate-500 font-bold uppercase tracking-widest mt-1 italic">
                     {card.loc}
                   </p>
                 </div>
@@ -332,7 +332,7 @@ export default function LandingPage() {
 
         {/* 3. STATS */}
         <section className="glass-card p-12 md:p-24 rounded-[60px] text-center border-indigo-500/10 mx-6 mb-32 md:mb-48 relative z-10">
-          <div className="text-[10px] font-black uppercase tracking-[0.5em] text-indigo-500 mb-12 italic opacity-80 leading-none">
+          <div className="text-xs font-black uppercase tracking-[0.5em] text-indigo-500 mb-12 italic opacity-80 leading-none">
             Status Sistema
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
@@ -345,7 +345,7 @@ export default function LandingPage() {
                 <div className={`text-3xl md:text-5xl font-black italic tracking-tighter mb-4 transition-all group-hover:text-indigo-500 group-hover:scale-105 duration-700 ${isDark ? "text-white" : "text-slate-900"}`}>
                   <CountUp end={s.val} suffix={s.suffix} />
                 </div>
-                <div className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-600 italic opacity-80">
+                <div className="text-xs font-black uppercase tracking-[0.4em] text-slate-600 italic opacity-80">
                   {s.label}
                 </div>
               </div>
@@ -382,7 +382,7 @@ export default function LandingPage() {
                       )}
                       <div className={`absolute top-0 right-0 w-48 h-48 bg-${scoreColor}-500/10 blur-[70px] pointer-events-none transition-all duration-1000 group-hover:scale-150`} />
                       <div className="flex justify-between items-start relative z-10">
-                        <div className={`bg-${scoreColor === "rose" ? "rose" : "indigo"}-600 text-white px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-xl`}>
+                        <div className={`bg-${scoreColor === "rose" ? "rose" : "indigo"}-600 text-white px-4 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-widest shadow-xl`}>
                           {badge}
                         </div>
                         <div className={`w-14 h-14 glass-card rounded-2xl flex items-center justify-center font-black italic text-xl text-${scoreColor === "rose" ? "rose" : "indigo"}-400 border-white/10`}>
@@ -394,7 +394,7 @@ export default function LandingPage() {
                       </h3>
                     </div>
                     <div className="p-10 relative">
-                      <p className={`text-[10px] font-bold uppercase tracking-widest mb-3 ${isDark ? "text-slate-600" : "text-slate-400"}`}>
+                      <p className={`text-xs font-bold uppercase tracking-widest mb-3 ${isDark ? "text-slate-600" : "text-slate-400"}`}>
                         {hotel.location}
                       </p>
                       {hotel.summary && (
@@ -402,7 +402,7 @@ export default function LandingPage() {
                           &quot;{hotel.summary}&quot;
                         </p>
                       )}
-                      <span className="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-500 flex items-center gap-4 group-hover:text-white transition-all italic leading-none group-hover:translate-x-2">
+                      <span className="text-xs font-black uppercase tracking-[0.25em] text-indigo-500 flex items-center gap-4 group-hover:text-white transition-all italic leading-none group-hover:translate-x-2">
                         DETALJI <ArrowRight size={16} />
                       </span>
                     </div>
@@ -427,7 +427,7 @@ export default function LandingPage() {
                 <div className="text-slate-500 group-hover:text-indigo-400 transition-all duration-500 group-hover:scale-110">
                   {cat.icon}
                 </div>
-                <span className={`text-[9px] font-black uppercase tracking-widest group-hover:text-indigo-400 transition-colors leading-none italic ${isDark ? "text-slate-600" : "text-slate-400"}`}>
+                <span className={`text-[11px] font-black uppercase tracking-widest group-hover:text-indigo-400 transition-colors leading-none italic ${isDark ? "text-slate-600" : "text-slate-400"}`}>
                   {cat.name}
                 </span>
               </div>
@@ -473,7 +473,7 @@ export default function LandingPage() {
                       <div className={`text-sm font-black uppercase tracking-widest italic ${isDark ? "text-white" : "text-slate-900"}`}>
                         {t.user}
                       </div>
-                      <div className="text-[9px] font-black text-slate-500 uppercase tracking-widest mt-1 opacity-60">
+                      <div className="text-[11px] font-black text-slate-500 uppercase tracking-widest mt-1 opacity-60">
                         {t.loc}
                       </div>
                     </div>
@@ -520,7 +520,7 @@ export default function LandingPage() {
 
             {/* Premium */}
             <div className="glass-card p-10 md:p-16 rounded-[60px] border-purple-500/20 bg-gradient-to-br from-purple-600/5 to-transparent relative overflow-hidden flex flex-col justify-between group">
-              <div className="absolute top-8 right-8 bg-purple-500 text-white px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest animate-pulse z-20 shadow-lg shadow-purple-500/20">
+              <div className="absolute top-8 right-8 bg-purple-500 text-white px-4 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-widest animate-pulse z-20 shadow-lg shadow-purple-500/20">
                 U PRIPREMI
               </div>
               <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none group-hover:rotate-12 transition-transform duration-1000 z-10">
@@ -564,7 +564,7 @@ export default function LandingPage() {
         {/* 8. FOOTER */}
         <footer className={`py-14 px-8 transition-colors border-t mt-10 ${isDark ? "border-white/5" : "border-black/5"}`}>
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-            <div className={`flex flex-wrap justify-center md:justify-start gap-8 text-[10px] font-black uppercase tracking-[0.2em] italic ${isDark ? "text-slate-500" : "text-slate-400"}`}>
+            <div className={`flex flex-wrap justify-center md:justify-start gap-8 text-xs font-black uppercase tracking-[0.2em] italic ${isDark ? "text-slate-500" : "text-slate-400"}`}>
               <Link href="/uslovi" className="hover:text-indigo-500 transition-colors">
                 Uslovi Koriscenja
               </Link>
@@ -576,7 +576,7 @@ export default function LandingPage() {
               </Link>
             </div>
             <div className="text-center md:text-right">
-              <p className={`text-[10px] font-black uppercase tracking-[0.2em] italic leading-relaxed ${isDark ? "text-slate-600" : "text-slate-400"}`}>
+              <p className={`text-xs font-black uppercase tracking-[0.2em] italic leading-relaxed ${isDark ? "text-slate-600" : "text-slate-400"}`}>
                 TRAVELAI SYSTEM &copy; 2026 — KREIRAO{" "}
                 <span className="text-indigo-500">IMPULSE</span> PART OF{" "}
                 <span className="text-indigo-400 tracking-widest">IMPULS TECH DOO</span>

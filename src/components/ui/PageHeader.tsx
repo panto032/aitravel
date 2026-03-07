@@ -26,7 +26,7 @@ export function PageHeader({ label, backHref }: PageHeaderProps) {
       </button>
 
       <span
-        className={`text-[10px] font-black uppercase tracking-[0.3em] italic ${
+        className={`text-xs font-black uppercase tracking-[0.3em] italic ${
           isDark ? "text-slate-600" : "text-slate-400"
         }`}
       >

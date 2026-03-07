@@ -50,7 +50,7 @@ function StatBox({
         {val}
       </div>
       <span
-        className={`text-[8px] font-black uppercase tracking-widest italic leading-none ${
+        className={`text-[11px] font-black uppercase tracking-widest italic leading-none ${
           isDark ? "text-slate-500" : "text-slate-400"
         }`}
       >
@@ -111,7 +111,7 @@ function MenuLink({
       <div className="flex items-center gap-4">
         {value && (
           <span
-            className={`text-[10px] font-black italic uppercase ${
+            className={`text-xs font-black italic uppercase ${
               isDark ? "text-slate-500" : "text-slate-400"
             }`}
           >
@@ -353,7 +353,7 @@ export default function ProfilePage() {
                 }`}
               />
               <span
-                className={`text-[9px] font-black uppercase tracking-widest ${
+                className={`text-[11px] font-black uppercase tracking-widest ${
                   profile?.plan === "PREMIUM" ? "text-amber-500" : "text-emerald-500"
                 }`}
               >
@@ -362,7 +362,7 @@ export default function ProfilePage() {
             </div>
 
             {profile?.role === "ADMIN" && (
-              <span className="text-[9px] font-black uppercase tracking-widest px-4 py-2.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20">
+              <span className="text-[11px] font-black uppercase tracking-widest px-4 py-2.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20">
                 Admin
               </span>
             )}
@@ -399,7 +399,7 @@ export default function ProfilePage() {
           <div>
             <div className="flex items-center justify-between mb-5 px-2">
               <h3
-                className={`text-[10px] font-black uppercase tracking-[0.4em] italic ${
+                className={`text-xs font-black uppercase tracking-[0.4em] italic ${
                   isDark ? "text-slate-500" : "text-slate-400"
                 }`}
               >
@@ -408,7 +408,7 @@ export default function ProfilePage() {
               {!editing && (
                 <button
                   onClick={() => setEditing(true)}
-                  className="text-[10px] font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 transition-colors italic cursor-pointer"
+                  className="text-xs font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 transition-colors italic cursor-pointer"
                 >
                   Izmeni
                 </button>
@@ -420,7 +420,7 @@ export default function ProfilePage() {
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <label
-                      className={`text-[9px] font-black uppercase tracking-widest ml-1 italic ${
+                      className={`text-[11px] font-black uppercase tracking-widest ml-1 italic ${
                         isDark ? "text-slate-500" : "text-slate-400"
                       }`}
                     >
@@ -435,7 +435,7 @@ export default function ProfilePage() {
                   </div>
                   <div className="space-y-2">
                     <label
-                      className={`text-[9px] font-black uppercase tracking-widest ml-1 italic ${
+                      className={`text-[11px] font-black uppercase tracking-widest ml-1 italic ${
                         isDark ? "text-slate-500" : "text-slate-400"
                       }`}
                     >
@@ -452,7 +452,7 @@ export default function ProfilePage() {
                     <button
                       onClick={handleSaveProfile}
                       disabled={saving}
-                      className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white px-7 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl active:scale-95 transition-all cursor-pointer"
+                      className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white px-7 py-3 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl active:scale-95 transition-all cursor-pointer"
                     >
                       {saving ? (
                         <Loader2 size={14} className="animate-spin" />
@@ -468,7 +468,7 @@ export default function ProfilePage() {
                         setEditEmail(profile?.email || "");
                         setEditMsg("");
                       }}
-                      className={`flex items-center gap-2 px-7 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all cursor-pointer ${
+                      className={`flex items-center gap-2 px-7 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all cursor-pointer ${
                         isDark
                           ? "border border-white/10 text-slate-400 hover:border-white/20"
                           : "border border-black/10 text-slate-500 hover:border-black/20"
@@ -547,7 +547,7 @@ export default function ProfilePage() {
           <div>
             <div className="flex items-center justify-between mb-5 px-2">
               <h3
-                className={`text-[10px] font-black uppercase tracking-[0.4em] italic ${
+                className={`text-xs font-black uppercase tracking-[0.4em] italic ${
                   isDark ? "text-slate-500" : "text-slate-400"
                 }`}
               >
@@ -556,7 +556,7 @@ export default function ProfilePage() {
               {!showPassword && (
                 <button
                   onClick={() => setShowPassword(true)}
-                  className="text-[10px] font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 transition-colors italic cursor-pointer"
+                  className="text-xs font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 transition-colors italic cursor-pointer"
                 >
                   Promeni
                 </button>
@@ -568,7 +568,7 @@ export default function ProfilePage() {
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <label
-                      className={`text-[9px] font-black uppercase tracking-widest ml-1 italic ${
+                      className={`text-[11px] font-black uppercase tracking-widest ml-1 italic ${
                         isDark ? "text-slate-500" : "text-slate-400"
                       }`}
                     >
@@ -592,7 +592,7 @@ export default function ProfilePage() {
                   </div>
                   <div className="space-y-2">
                     <label
-                      className={`text-[9px] font-black uppercase tracking-widest ml-1 italic ${
+                      className={`text-[11px] font-black uppercase tracking-widest ml-1 italic ${
                         isDark ? "text-slate-500" : "text-slate-400"
                       }`}
                     >
@@ -622,7 +622,7 @@ export default function ProfilePage() {
                         !currentPassword ||
                         newPassword.length < 6
                       }
-                      className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white px-7 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl active:scale-95 transition-all cursor-pointer"
+                      className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white px-7 py-3 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl active:scale-95 transition-all cursor-pointer"
                     >
                       {changingPassword ? (
                         <Loader2 size={14} className="animate-spin" />
@@ -638,7 +638,7 @@ export default function ProfilePage() {
                         setNewPassword("");
                         setPasswordMsg("");
                       }}
-                      className={`flex items-center gap-2 px-7 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all cursor-pointer ${
+                      className={`flex items-center gap-2 px-7 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all cursor-pointer ${
                         isDark
                           ? "border border-white/10 text-slate-400 hover:border-white/20"
                           : "border border-black/10 text-slate-500 hover:border-black/20"
@@ -680,7 +680,7 @@ export default function ProfilePage() {
           {/* ─── Settings Menu ─── */}
           <div>
             <h3
-              className={`text-[10px] font-black uppercase tracking-[0.4em] italic mb-5 px-2 ${
+              className={`text-xs font-black uppercase tracking-[0.4em] italic mb-5 px-2 ${
                 isDark ? "text-slate-500" : "text-slate-400"
               }`}
             >

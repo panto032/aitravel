@@ -253,7 +253,7 @@ export function AuthForm({ defaultTab = "login" }: AuthFormProps) {
         </div>
         <div className="relative flex justify-center">
           <span
-            className={`px-4 text-[10px] font-black uppercase tracking-widest ${
+            className={`px-4 text-xs font-black uppercase tracking-widest ${
               isDark
                 ? "bg-[#020205] text-slate-600"
                 : "bg-slate-50 text-slate-400"
@@ -297,7 +297,7 @@ export function AuthForm({ defaultTab = "login" }: AuthFormProps) {
 
       {/* Legal */}
       <p
-        className={`text-center text-[10px] mt-6 ${
+        className={`text-center text-xs mt-6 ${
           isDark ? "text-slate-700" : "text-slate-400"
         }`}
       >
