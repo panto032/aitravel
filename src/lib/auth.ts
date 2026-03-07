@@ -97,29 +97,28 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.plan = user.plan || "FREE";
       }
 
-      // Auto-promote first user to ADMIN if no admin exists
-      try {
-        if (token.id && token.role !== "ADMIN") {
+      // Auto-promote first user to ADMIN — only on initial sign-in
+      if (user && token.role !== "ADMIN") {
+        try {
           const adminExists = await prisma.user.findFirst({
             where: { role: "ADMIN" },
             select: { id: true },
           });
           if (!adminExists) {
-            const firstUser = await prisma.user.findFirst({
-              orderBy: { createdAt: "asc" },
-              select: { id: true },
+            await prisma.user.update({
+              where: { id: token.id as string },
+              data: { role: "ADMIN" },
             });
-            if (firstUser && firstUser.id === token.id) {
-              await prisma.user.update({
-                where: { id: token.id as string },
-                data: { role: "ADMIN" },
-              });
-              token.role = "ADMIN";
-            }
+            token.role = "ADMIN";
           }
+        } catch (error) {
+          console.error("[Auth] Admin promotion error:", error);
         }
+      }
 
-        if (trigger === "update" && token.id) {
+      // Refresh role/plan from DB only on explicit session update
+      if (trigger === "update" && token.id) {
+        try {
           const dbUser = await prisma.user.findUnique({
             where: { id: token.id as string },
             select: { role: true, plan: true },
@@ -128,9 +127,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             token.role = dbUser.role;
             token.plan = dbUser.plan;
           }
+        } catch (error) {
+          console.error("[Auth] Session update error:", error);
         }
-      } catch (error) {
-        console.error("JWT callback DB error:", error);
       }
       return token;
     },
