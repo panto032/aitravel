@@ -359,6 +359,9 @@ Odgovaraj na srpskom jeziku.`,
     }));
   }
 
+  // Boost exact hotel name match to top of results
+  enrichedResults = boostExactMatch(enrichedResults, query);
+
   const result: SearchResponse = {
     destination: haikuResult.destination,
     summary: haikuResult.summary,
@@ -452,7 +455,46 @@ function mergeSearchResults(
     });
   }
 
-  return results.sort((a, b) => b.aiScore - a.aiScore);
+  return results;
+}
+
+/**
+ * Boost exact query match to top of results
+ * If user typed a specific hotel name, that hotel should be #1
+ */
+function boostExactMatch(results: SearchResult[], query: string): SearchResult[] {
+  if (results.length <= 1) return results;
+
+  const q = query.toLowerCase().replace(/[^a-z0-9\s]/gi, "");
+  const qWords = q.split(/\s+/).filter(w => w.length > 2);
+  if (qWords.length < 2) return results; // Too short to be a specific hotel name
+
+  let bestIdx = -1;
+  let bestScore = 0;
+
+  for (let i = 0; i < results.length; i++) {
+    const name = results[i].hotelName.toLowerCase().replace(/[^a-z0-9\s]/gi, "");
+    const nameWords = name.split(/\s+/);
+
+    // Count how many query words appear in the hotel name
+    const matchCount = qWords.filter(qw =>
+      nameWords.some(nw => nw.includes(qw) || qw.includes(nw))
+    ).length;
+    const score = matchCount / qWords.length;
+
+    if (score > bestScore && score >= 0.5) {
+      bestScore = score;
+      bestIdx = i;
+    }
+  }
+
+  // If strong match found and it's not already first, move it to top
+  if (bestIdx > 0) {
+    const [match] = results.splice(bestIdx, 1);
+    results.unshift(match);
+  }
+
+  return results;
 }
 
 function findBestMatch(
