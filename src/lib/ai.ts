@@ -591,18 +591,35 @@ export async function analyzeHotel(
   googlePlaceId?: string,
   forceRefresh = false
 ): Promise<HotelAnalysis> {
+  // Normalize name/location for consistent cache keys
+  const normalizedName = hotelName.trim();
+  const normalizedLocation = location.trim();
+
   // Check hotel cache first (permanent — no TTL expiry)
+  // Try googlePlaceId first (most reliable), then fallback to name+location
   if (!forceRefresh) {
-    const cached = await prisma.hotelCache.findUnique({
-      where: { name_location: { name: hotelName, location } },
-    });
+    let cached = null;
+
+    if (googlePlaceId) {
+      cached = await prisma.hotelCache.findFirst({
+        where: { googlePlaceId },
+      });
+    }
+
+    if (!cached) {
+      cached = await prisma.hotelCache.findUnique({
+        where: { name_location: { name: normalizedName, location: normalizedLocation } },
+      });
+    }
 
     if (cached?.aiAnalysis) {
-      await logApiUsage(userId, "analyze", "cache", 0, 0, hotelName, true);
+      console.log(`[Cache HIT] ${normalizedName} (${googlePlaceId || "name+location"})`);
+      await logApiUsage(userId, "analyze", "cache", 0, 0, normalizedName, true);
       const cachedResult = cached.aiAnalysis as unknown as HotelAnalysis;
       cachedResult.cachedAt = cached.updatedAt.toISOString();
       return cachedResult;
     }
+    console.log(`[Cache MISS] ${normalizedName} — running full analysis`);
   }
 
   // Check rate limit
@@ -818,11 +835,11 @@ export async function analyzeHotel(
 
   // Cache in HotelCache
   await prisma.hotelCache.upsert({
-    where: { name_location: { name: hotelName, location } },
+    where: { name_location: { name: normalizedName, location: normalizedLocation } },
     update: {
       aiAnalysis: result as unknown as Prisma.InputJsonValue,
       aiScore: result.aiScore,
-      googlePlaceId: result.googlePlaceId,
+      googlePlaceId: result.googlePlaceId || googlePlaceId,
       latitude: placeDetails?.location?.latitude,
       longitude: placeDetails?.location?.longitude,
       googleRating: placeDetails?.rating,
@@ -840,8 +857,8 @@ export async function analyzeHotel(
       updatedAt: new Date(),
     },
     create: {
-      name: hotelName,
-      location,
+      name: normalizedName,
+      location: normalizedLocation,
       aiAnalysis: result as unknown as Prisma.InputJsonValue,
       aiScore: result.aiScore,
       sources: result.reviewSources || [],
