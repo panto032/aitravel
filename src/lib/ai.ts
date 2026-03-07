@@ -394,8 +394,28 @@ Odgovaraj na srpskom jeziku.`,
 }
 
 /**
+ * Convert Cyrillic text to Latin (Serbian transliteration)
+ */
+function cyrillicToLatin(text: string): string {
+  const map: Record<string, string> = {
+    "А": "A", "Б": "B", "В": "V", "Г": "G", "Д": "D", "Ђ": "Đ", "Е": "E",
+    "Ж": "Ž", "З": "Z", "И": "I", "Ј": "J", "К": "K", "Л": "L", "Љ": "Lj",
+    "М": "M", "Н": "N", "Њ": "Nj", "О": "O", "П": "P", "Р": "R", "С": "S",
+    "Т": "T", "Ћ": "Ć", "У": "U", "Ф": "F", "Х": "H", "Ц": "C", "Ч": "Č",
+    "Џ": "Dž", "Ш": "Š",
+    "а": "a", "б": "b", "в": "v", "г": "g", "д": "d", "ђ": "đ", "е": "e",
+    "ж": "ž", "з": "z", "и": "i", "ј": "j", "к": "k", "л": "l", "љ": "lj",
+    "м": "m", "н": "n", "њ": "nj", "о": "o", "п": "p", "р": "r", "с": "s",
+    "т": "t", "ћ": "ć", "у": "u", "ф": "f", "х": "h", "ц": "c", "ч": "č",
+    "џ": "dž", "ш": "š",
+  };
+  return text.replace(/[А-Яа-яЂђЉљЊњЋћЏџ]/g, (ch) => map[ch] || ch);
+}
+
+/**
  * Merge AI suggestions with Google Places data
  * Google-verified hotels get priority; AI-only hotels marked as unverified
+ * Only includes hotels that have photos
  */
 function mergeSearchResults(
   aiHotels: SearchResult[],
@@ -408,24 +428,28 @@ function mergeSearchResults(
   for (const aiHotel of aiHotels) {
     const match = findBestMatch(aiHotel.hotelName, googlePlaces);
     if (match && !usedGoogleIds.has(match.id)) {
+      const photoUrl = match.photos?.[0]
+        ? getPhotoUrl(match.photos[0].name)
+        : undefined;
+
+      // Skip hotels without photos
+      if (!photoUrl) continue;
+
       usedGoogleIds.add(match.id);
       results.push({
         ...aiHotel,
-        hotelName: match.displayName?.text || aiHotel.hotelName,
-        location: match.formattedAddress || aiHotel.location,
+        hotelName: cyrillicToLatin(match.displayName?.text || aiHotel.hotelName),
+        location: cyrillicToLatin(match.formattedAddress || aiHotel.location),
         googlePlaceId: match.id,
         googleRating: match.rating,
         googleReviewCount: match.userRatingCount,
-        photoUrl: match.photos?.[0]
-          ? getPhotoUrl(match.photos[0].name)
-          : undefined,
+        photoUrl,
         verified: true,
         latitude: match.location?.latitude,
         longitude: match.location?.longitude,
       });
-    } else {
-      results.push({ ...aiHotel, verified: false });
     }
+    // Skip unverified AI-only hotels (no photo available)
   }
 
   // Add remaining Google results not matched to AI suggestions
@@ -433,9 +457,16 @@ function mergeSearchResults(
     if (usedGoogleIds.has(gp.id)) continue;
     if (results.length >= 12) break;
 
+    const photoUrl = gp.photos?.[0]
+      ? getPhotoUrl(gp.photos[0].name)
+      : undefined;
+
+    // Skip hotels without photos
+    if (!photoUrl) continue;
+
     results.push({
-      hotelName: gp.displayName?.text || "Unknown",
-      location: gp.formattedAddress || "",
+      hotelName: cyrillicToLatin(gp.displayName?.text || "Unknown"),
+      location: cyrillicToLatin(gp.formattedAddress || ""),
       aiScore: googleRatingToAiScore(gp.rating || 0),
       priceRange: priceLevelToRange(gp.priceLevel),
       distance: "",
@@ -446,9 +477,7 @@ function mergeSearchResults(
       googlePlaceId: gp.id,
       googleRating: gp.rating,
       googleReviewCount: gp.userRatingCount,
-      photoUrl: gp.photos?.[0]
-        ? getPhotoUrl(gp.photos[0].name)
-        : undefined,
+      photoUrl,
       verified: true,
       latitude: gp.location?.latitude,
       longitude: gp.location?.longitude,
@@ -465,7 +494,7 @@ function mergeSearchResults(
 function boostExactMatch(results: SearchResult[], query: string): SearchResult[] {
   if (results.length <= 1) return results;
 
-  const q = query.toLowerCase().replace(/[^a-z0-9\s]/gi, "");
+  const q = cyrillicToLatin(query).toLowerCase().replace(/[^a-z0-9\s\u00c0-\u024f]/gi, "");
   const qWords = q.split(/\s+/).filter(w => w.length > 2);
   if (qWords.length < 2) return results; // Too short to be a specific hotel name
 
@@ -473,7 +502,7 @@ function boostExactMatch(results: SearchResult[], query: string): SearchResult[]
   let bestScore = 0;
 
   for (let i = 0; i < results.length; i++) {
-    const name = results[i].hotelName.toLowerCase().replace(/[^a-z0-9\s]/gi, "");
+    const name = cyrillicToLatin(results[i].hotelName).toLowerCase().replace(/[^a-z0-9\s\u00c0-\u024f]/gi, "");
     const nameWords = name.split(/\s+/);
 
     // Count how many query words appear in the hotel name
@@ -501,14 +530,14 @@ function findBestMatch(
   name: string,
   places: GooglePlace[]
 ): GooglePlace | null {
-  const normalized = name.toLowerCase().replace(/[^a-z0-9\s]/gi, "");
+  const normalized = cyrillicToLatin(name).toLowerCase().replace(/[^a-z0-9\s\u00c0-\u024f]/gi, "");
   let bestMatch: GooglePlace | null = null;
   let bestScore = 0;
 
   for (const place of places) {
-    const placeName = (place.displayName?.text || "")
+    const placeName = cyrillicToLatin(place.displayName?.text || "")
       .toLowerCase()
-      .replace(/[^a-z0-9\s]/gi, "");
+      .replace(/[^a-z0-9\s\u00c0-\u024f]/gi, "");
 
     // Check word overlap
     const nameWords = normalized.split(/\s+/);
