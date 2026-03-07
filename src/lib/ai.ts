@@ -804,15 +804,16 @@ export async function analyzeHotel(
   result.photos = photos;
   result.verified = !!placeDetails;
   result.dataQuality = dataQuality;
-  result.languageBreakdown = geminiAnalysis?.languageBreakdown;
+  result.languageBreakdown = (geminiAnalysis as GeminiAnalysis | null)?.languageBreakdown;
   result.latitude = placeDetails?.location?.latitude;
   result.longitude = placeDetails?.location?.longitude;
   result.cachedAt = new Date().toISOString();
 
   // Merge Gemini trends and quotes into scores
-  if (geminiAnalysis) {
+  const gemini = geminiAnalysis as GeminiAnalysis | null;
+  if (gemini) {
     for (const score of result.scores) {
-      const geminiScore = geminiAnalysis.scores.find(
+      const geminiScore = gemini.scores.find(
         (gs) =>
           gs.category.toLowerCase() === score.category.toLowerCase() ||
           gs.category
